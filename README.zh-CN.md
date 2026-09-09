@@ -50,7 +50,7 @@ UniBoot 由三层组成：
 
 ```text
 /boot/       # Ventoy + iPXE
-/local/iso/  # 用户自放 ISO（可选）
+/iso/        # 用户自放 ISO（可选）
 /config/     # 本地配置
 ```
 
