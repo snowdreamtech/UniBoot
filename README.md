@@ -51,7 +51,7 @@ UniBoot consists of three layers:
 
 ```text
 /boot/       # Ventoy + iPXE
-/local/iso/  # User-provided ISO (optional)
+/iso/        # User-provided ISO (optional)
 /config/     # Local configuration
 ```
 
