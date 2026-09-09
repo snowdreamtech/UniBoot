@@ -13,9 +13,15 @@ RED='\033[0;31m'
 NC='\033[0m'
 
 LANG_OPTION="${1:-zh_CN}"
+FULLSCREEN_ARG="${2:-on}"
+
+DISPLAY_OPT="cocoa,zoom-to-fit=on"
+if [[ "$FULLSCREEN_ARG" == "fullscreen" || "$FULLSCREEN_ARG" == "full" || "$FULLSCREEN_ARG" == "on" ]]; then
+    DISPLAY_OPT="cocoa,full-screen=on,zoom-to-fit=on"
+fi
 
 echo -e "${BLUE}=== UniBoot Legacy BIOS Mode QEMU Tester ===${NC}"
-echo -e "${BLUE}Testing Language: ${LANG_OPTION}${NC}"
+echo -e "${BLUE}Testing Language: ${LANG_OPTION} | Display: ${DISPLAY_OPT}${NC}"
 
 # 1. Detect Ventoy USB Disk Identifier
 echo -e "${BLUE}[1/4] Detecting Ventoy USB drive...${NC}"
@@ -62,7 +68,7 @@ sudo qemu-system-x86_64 \
     -device virtio-vga,xres=1280,yres=800 \
     -netdev user,id=net0 \
     -device e1000,netdev=net0 \
-    -display cocoa,zoom-to-fit=on \
+    -display "${DISPLAY_OPT}" \
     -drive "file=/dev/r${DISK_ID},format=raw"
 
 echo -e "${GREEN}[4/4] QEMU session finished.${NC}"
