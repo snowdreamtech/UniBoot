@@ -15,9 +15,10 @@ NC='\033[0m'
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TEST_MODE="${1:-uefi}"
 LANG_OPTION="${2:-zh_CN}"
+FULLSCREEN_OPTION="${3:-on}"
 
 echo -e "${BLUE}=== UniBoot Sync & Test Runner ===${NC}"
-echo -e "${BLUE}Target Mode: ${TEST_MODE} | Language: ${LANG_OPTION}${NC}"
+echo -e "${BLUE}Target Mode: ${TEST_MODE} | Language: ${LANG_OPTION} | Fullscreen: ${FULLSCREEN_OPTION}${NC}"
 
 # 1. Detect & Mount USB Disk
 if [ ! -d "/Volumes/Ventoy" ]; then
@@ -45,8 +46,8 @@ echo -e "${GREEN}Sync complete!${NC}"
 # 3. Run Test Mode (Default: UEFI, Option: bios)
 if [ "$TEST_MODE" == "bios" ]; then
     echo -e "${BLUE}[2/2] Launching QEMU Legacy BIOS test runner...${NC}"
-    bash "${SCRIPT_DIR}/test-bios.sh" "$LANG_OPTION"
+    bash "${SCRIPT_DIR}/test-bios.sh" "$LANG_OPTION" "$FULLSCREEN_OPTION"
 else
     echo -e "${BLUE}[2/2] Launching QEMU UEFI test runner...${NC}"
-    bash "${SCRIPT_DIR}/test-uefi.sh" "$LANG_OPTION"
+    bash "${SCRIPT_DIR}/test-uefi.sh" "$LANG_OPTION" "$FULLSCREEN_OPTION"
 fi

@@ -13,9 +13,15 @@ RED='\033[0;31m'
 NC='\033[0m'
 
 LANG_OPTION="${1:-zh_CN}"
+FULLSCREEN_ARG="${2:-on}"
+
+DISPLAY_OPT="cocoa,zoom-to-fit=on"
+if [[ "$FULLSCREEN_ARG" == "fullscreen" || "$FULLSCREEN_ARG" == "full" || "$FULLSCREEN_ARG" == "on" ]]; then
+    DISPLAY_OPT="cocoa,full-screen=on,zoom-to-fit=on"
+fi
 
 echo -e "${BLUE}=== UniBoot Universal UEFI QEMU Tester ===${NC}"
-echo -e "${BLUE}Testing Language: ${LANG_OPTION}${NC}"
+echo -e "${BLUE}Testing Language: ${LANG_OPTION} | Display: ${DISPLAY_OPT}${NC}"
 
 # Detect Host OS
 OS_TYPE="unknown"
@@ -100,7 +106,7 @@ if [ "$OS_TYPE" == "macOS" ]; then
             -device virtio-vga,xres=1280,yres=800 \
             -netdev user,id=net0 \
             -device e1000,netdev=net0 \
-            -display cocoa,zoom-to-fit=on \
+            -display "${DISPLAY_OPT}" \
             -drive "if=pflash,format=raw,readonly=on,file=$OVMF_FW" \
             -drive "file=fat:rw:$AUTO_UEFI_DIR,format=raw" \
             -drive "file=$RAW_DRIVE,format=raw"
@@ -111,7 +117,7 @@ if [ "$OS_TYPE" == "macOS" ]; then
             -device virtio-vga,xres=1280,yres=800 \
             -netdev user,id=net0 \
             -device e1000,netdev=net0 \
-            -display cocoa,zoom-to-fit=on \
+            -display "${DISPLAY_OPT}" \
             -drive "file=fat:rw:$AUTO_UEFI_DIR,format=raw" \
             -drive "file=$RAW_DRIVE,format=raw"
     fi
