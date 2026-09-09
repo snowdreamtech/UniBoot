@@ -1,0 +1,217 @@
+########################################
+# UniBoot .gitignore
+# Copyright (c) 2026-present SnowdreamTech Inc.
+########################################
+
+########################################
+# Core ignore rules
+########################################
+
+# Logs
+logs/
+*.log
+*.log.*
+*.err
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*.bak
+*.old
+*~
+
+# IDE / Editor
+.vscode/
+.idea/
+*.iml
+.zed/
+.fleet/
+*.sublime-workspace
+*.sublime-project
+.project
+.classpath
+.settings/
+
+# AI Assistants & Antigravity
+.antigravity/
+.gemini/
+.aiconfig
+.cursor/
+.cursorrules
+.cline/
+.roo/
+
+########################################
+# Build / Output
+########################################
+
+dist/
+build/
+out/
+target/
+bin/
+obj/
+
+# Cache
+.cache/
+*.cache
+__pycache__/
+*.pyc
+
+########################################
+# Environment files
+########################################
+
+.env
+.env.*
+*.env.local
+*.env.development
+*.env.production
+
+########################################
+# UniBoot Specific
+########################################
+
+# Local ISO storage (user-provided)
+local/iso/
+local/iso/*
+
+# OS Images and Disk Containers (UniBoot does not track binaries)
+*.iso
+*.wim
+*.esd
+*.dmg
+*.ipsw
+*.img
+*.vhd
+*.vhdx
+*.vmdk
+*.qcow2
+
+# Network boot generated files
+netboot/menu.ipxe
+netboot/profiles/
+netboot/scripts/
+netboot/sources/
+
+# Bootloader binaries (not stored in repo)
+boot/EFI/
+boot/grub/
+boot/ipxe/
+boot/ventoy/
+
+# Temporary runtime data
+runtime/
+tmp/
+temp/
+*_backup.json
+ventoy_backup.json
+
+
+########################################
+# Go (for backend tools, optional)
+########################################
+
+# Binaries
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Go build cache
+*.test
+*.out
+
+# Go modules
+vendor/
+go.sum
+
+########################################
+# Python (optional backend utilities)
+########################################
+
+# Virtual environments
+venv/
+env/
+.venv/
+ENV/
+
+# Python build
+build/
+dist/
+*.egg-info/
+
+########################################
+# Documentation build output
+########################################
+
+docs/_build/
+docs/.cache/
+docs/build/
+
+########################################
+# Private / Sensitive
+########################################
+
+# Private keys
+*.key
+*.pem
+*.crt
+*.p12
+
+# Credentials
+credentials/
+secrets/
+secret/
+*.secret
+*.token
+
+########################################
+# OS-specific
+########################################
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+.fseventsd
+.VolumeIcon.icns
+.apdisk
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+desktop.ini
+$RECYCLE.BIN/
+*.stackdump
+*.lnk
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*/
+
+########################################
+# Archive files
+########################################
+
+*.zip
+*.tar
+*.gz
+*.bz2
+*.xz
+*.zst
+*.7z
+*.rar
+*.tgz
+
+########################################
+# End of UniBoot .gitignore
+########################################
