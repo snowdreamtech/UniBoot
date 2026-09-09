@@ -1,0 +1,9 @@
+#!ipxe
+# UniBoot Triple-Fallback Entry Script
+# Copyright (c) 2026-present SnowdreamTech Inc.
+
+dhcp
+# 1. 优先读取 U 盘本地的 custom.ipxe (0 秒秒开)
+# 2. 如果本地没有，再去拉取云端的 custom.ipxe
+# 3. 如果都失败，自动降级为官方 Netboot.xyz 主菜单
+chain custom.ipxe || chain https://raw.githubusercontent.com/snowdreamtech/UniBoot/main/netboot/custom.ipxe || chain https://boot.netboot.xyz/menu.ipxe
