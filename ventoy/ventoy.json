@@ -2,19 +2,5 @@
     "control":[
         { "VTOY_MENU_LANGUAGE": "zh_CN" },
         { "VTOY_DEFAULT_SEARCH_ROOT": "/iso" }
-    ],
-    "image_list": [
-        "/netboot/netboot.xyz.efi",
-        "/netboot/netboot.xyz.lkrn"
-    ],
-    "menu_alias": [
-        {
-            "image": "/netboot/netboot.xyz.efi",
-            "alias": "Netboot.xyz UEFI (网络安装 - UEFI 模式)"
-        },
-        {
-            "image": "/netboot/netboot.xyz.lkrn",
-            "alias": "Netboot.xyz Legacy BIOS (网络安装 - Legacy BIOS 模式)"
-        }
     ]
 }
