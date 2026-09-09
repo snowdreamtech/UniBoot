@@ -1,6 +1,9 @@
 {
-    "control":[
-        { "VTOY_MENU_LANGUAGE": "zh_CN" },
-        { "VTOY_DEFAULT_SEARCH_ROOT": "/iso" }
+    "control": [
+        { "VTOY_FILE_FLT_EFI": "0" },
+        { "VTOY_FILT_DOT_UNDERSCORE_FILE": "1" },
+        { "VTOY_SORT_CASE_SENSITIVE": "0" },
+        { "VTOY_WIN11_BYPASS_CHECK": "1" },
+        { "VTOY_WIN11_BYPASS_NRO": "1" }
     ]
 }
