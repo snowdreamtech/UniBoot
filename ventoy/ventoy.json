@@ -1,4 +1,7 @@
 {
+    "theme": {
+        "gfxmode": "1280x800"
+    },
     "control": [
         { "VTOY_FILE_FLT_EFI": "0" },
         { "VTOY_FILT_DOT_UNDERSCORE_FILE": "1" },
