@@ -38,7 +38,11 @@ if [ ! -d "/Volumes/Ventoy" ]; then
     exit 1
 fi
 
-# 2. Perform Sync
+# 2. Build UniBoot.iso (always regenerate to ensure latest scripts are packed)
+echo -e "${BLUE}Generating UniBoot Universal Hybrid ISO...${NC}"
+bash "${SCRIPT_DIR}/scripts/make_uniboot_iso.sh"
+
+# 3. Perform Sync
 echo -e "${BLUE}[1/2] Syncing project files to Ventoy USB...${NC}"
 rsync -av --exclude='.git' --exclude='.DS_Store' "${SCRIPT_DIR}/" "/Volumes/Ventoy/"
 echo -e "${GREEN}Sync complete!${NC}"
