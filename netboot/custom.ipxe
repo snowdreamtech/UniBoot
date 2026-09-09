@@ -1,0 +1,44 @@
+#!ipxe
+# UniBoot Custom iPXE Dynamic Menu
+# Copyright (c) 2026-present SnowdreamTech Inc.
+
+:custom
+clear custom_choice
+menu UniBoot Unified Network Installation Platform (统一网络安装平台)
+item --gap --             ---------------- Operating System (操作系统) ----------------
+item ubuntu               Install Ubuntu Linux (安装 Ubuntu Linux)
+item debian               Install Debian Linux (安装 Debian Linux)
+item fedora               Install Fedora Linux (安装 Fedora Linux)
+item win11                Install Windows 11 Official (安装 Windows 11 官方版)
+item --gap --             ---------------- Official Utilities (官方工具) ----------------
+item netboot_official     Official Netboot.xyz Menu (官方 Netboot.xyz 主菜单)
+item --gap --             ---------------- System Control (系统控制) ----------------
+item reboot               Reboot System (重启计算机)
+item exit                 Exit to Local Disk (返回本地硬盘)
+choose custom_choice || goto custom_exit
+
+:ubuntu
+set boot_params locale=zh_CN.UTF-8
+chain https://boot.netboot.xyz/ubuntu.ipxe
+
+:debian
+set boot_params locale=zh_CN.UTF-8
+chain https://boot.netboot.xyz/debian.ipxe
+
+:fedora
+chain https://boot.netboot.xyz/fedora.ipxe
+
+:win11
+chain https://boot.netboot.xyz/windows.ipxe
+
+:netboot_official
+chain https://boot.netboot.xyz/menu.ipxe
+
+:reboot
+reboot
+
+:exit
+exit
+
+:custom_exit
+exit 0
