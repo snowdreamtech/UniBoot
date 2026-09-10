@@ -3,7 +3,7 @@
 # Copyright (c) 2026-present SnowdreamTech Inc.
 
 dhcp
-# 由于能进入这个脚本，说明 U 盘本地没有 uniboot.ipxe。
-# 1. 直接拉取云端的 uniboot.ipxe
-# 2. 如果拉取失败，自动降级为官方 Netboot.xyz 主菜单
+# If this script is loaded, it means the local uniboot.ipxe is missing.
+# 1. Fetch the latest uniboot.ipxe menu directly from the cloud
+# 2. If network fetch fails, fallback to official Netboot.xyz main menu
 chain https://raw.githubusercontent.com/snowdreamtech/UniBoot/main/ipxe/uniboot.ipxe || chain https://boot.netboot.xyz/menu.ipxe
