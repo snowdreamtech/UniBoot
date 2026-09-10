@@ -1,0 +1,29 @@
+# UniBoot Official Original Ventoy Theme
+# Copyright (c) 2026-present SnowdreamTech Inc. All rights reserved.
+
+title-text: ""
+desktop-image: "background.png"
+desktop-color: "#070A12"
+
++ boot_menu {
+    left = 120
+    top = 140
+    width = 1040
+    height = 530
+    item_color = "#FFFFFF"
+    selected_item_color = "#00E5FF"
+    item_height = 44
+    item_padding = 15
+    item_spacing = 8
+    selected_item_pixmap_style = "select_*.png"
+}
+
++ progress_bar {
+    id = "__timeout__"
+    left = 120
+    top = 675
+    width = 1040
+    height = 8
+    show_text = true
+    text_color = "#00E5FF"
+}

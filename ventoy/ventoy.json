@@ -1,6 +1,8 @@
 {
     "theme": {
-        "gfxmode": "1280x800"
+        "file": "/ventoy/themes/uniboot/theme.txt",
+        "gfxmode": "1280x800",
+        "display": "full"
     },
     "control": [
         { "VTOY_DEFAULT_IMAGE": "/iso/UniBoot.iso" },
