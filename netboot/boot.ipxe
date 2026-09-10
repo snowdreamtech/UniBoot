@@ -3,7 +3,7 @@
 # Copyright (c) 2026-present SnowdreamTech Inc.
 
 dhcp
-# 1. Try local custom.ipxe on USB storage first (zero-latency offline boot)
-# 2. Fall back to remote cloud custom.ipxe if local file is absent
-# 3. Fall back to official Netboot.xyz main menu if remote request fails
-chain custom.ipxe || chain https://raw.githubusercontent.com/snowdreamtech/UniBoot/main/netboot/custom.ipxe || chain https://boot.netboot.xyz/menu.ipxe
+# 1. 优先读取 U 盘本地的 uniboot.ipxe (0 秒秒开)
+# 2. 如果本地没有，再去拉取云端的 uniboot.ipxe
+# 3. 如果都失败，自动降级为官方 Netboot.xyz 主菜单
+chain uniboot.ipxe || chain https://raw.githubusercontent.com/snowdreamtech/UniBoot/main/netboot/uniboot.ipxe || chain https://boot.netboot.xyz/menu.ipxe
