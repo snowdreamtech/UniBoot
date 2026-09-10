@@ -10,7 +10,7 @@ set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
-OUTPUT_ISO="${PROJECT_ROOT}/ipxe/UniBoot.iso"
+OUTPUT_ISO="${PROJECT_ROOT}/iso/UniBoot.iso"
 CACHE_DIR="${SCRIPT_DIR}/.cache"
 STAGING_DIR=""
 SYSLINUX_VERSION="6.03"
@@ -211,7 +211,7 @@ mkdir -p "${STAGING_DIR}/isolinux"
 cp "${ISOLINUX_DIR}/isolinux.bin" "${STAGING_DIR}/isolinux/"
 [ -f "${ISOLINUX_DIR}/ldlinux.c32" ] && cp "${ISOLINUX_DIR}/ldlinux.c32" "${STAGING_DIR}/isolinux/"
 
-# Create ISOLINUX config: auto-boot ipxe.lkrn with boot.ipxe as initrd
+# Create ISOLINUX config: lkrn has boot.ipxe embedded at compile time, no INITRD needed
 cat > "${STAGING_DIR}/isolinux/isolinux.cfg" << 'ISOCFG'
 DEFAULT uniboot
 PROMPT 0
@@ -219,7 +219,6 @@ TIMEOUT 0
 
 LABEL uniboot
     LINUX /ipxe.lkrn
-    INITRD /boot.ipxe
 ISOCFG
 
 # Copy all iPXE lkrn binaries

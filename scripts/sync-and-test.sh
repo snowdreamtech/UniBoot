@@ -80,21 +80,29 @@ fi
 echo -e "${BLUE}${I18N_ST_GEN_ISO}${NC}"
 bash "${SCRIPT_DIR}/make_uniboot_iso.sh"
 
-# 3. Perform Sync
+# 3. Perform Precise Sync (Sync ipxe, iso, ventoy, LICENSE and README files; exclude scripts, run.sh, .gitignore)
 echo -e "${BLUE}${I18N_ST_SYNCING}${NC}"
-rsync -av --delete --exclude='.git' --exclude='.DS_Store' "${SCRIPT_DIR}/../" "/Volumes/Ventoy/"
+mkdir -p "/Volumes/Ventoy/ipxe" "/Volumes/Ventoy/ventoy"
+rsync -av --delete "${SCRIPT_DIR}/../ipxe/" "/Volumes/Ventoy/ipxe/"
+rsync -av --delete "${SCRIPT_DIR}/../ventoy/" "/Volumes/Ventoy/ventoy/"
+[ -d "${SCRIPT_DIR}/../iso" ] && rsync -av "${SCRIPT_DIR}/../iso" "/Volumes/Ventoy/"
+[ -f "${SCRIPT_DIR}/../LICENSE" ] && rsync -av "${SCRIPT_DIR}/../LICENSE" "/Volumes/Ventoy/"
+[ -f "${SCRIPT_DIR}/../README.md" ] && rsync -av "${SCRIPT_DIR}/../README.md" "/Volumes/Ventoy/"
+[ -f "${SCRIPT_DIR}/../README.zh-CN.md" ] && rsync -av "${SCRIPT_DIR}/../README.zh-CN.md" "/Volumes/Ventoy/"
 echo -e "${GREEN}${I18N_ST_SYNC_DONE}${NC}"
 
 # 4. Run Test Mode (Default: bios, Options: uefi, both)
-if [ "$TEST_MODE" == "both" ]; then
+if [[ "$TEST_MODE" == "both" ]]; then
     echo -e "${BLUE}${I18N_ST_LAUNCH_BIOS_FIRST}${NC}"
     bash "${SCRIPT_DIR}/test-bios.sh" "$LANG_OPTION" "$FULLSCREEN_OPTION"
     echo -e "${BLUE}${I18N_ST_LAUNCH_UEFI_NEXT}${NC}"
     bash "${SCRIPT_DIR}/test-uefi.sh" "$LANG_OPTION" "$FULLSCREEN_OPTION"
-elif [ "$TEST_MODE" == "uefi" ]; then
+elif [[ "$TEST_MODE" == "uefi" ]]; then
     echo -e "${BLUE}${I18N_ST_LAUNCH_UEFI}${NC}"
     bash "${SCRIPT_DIR}/test-uefi.sh" "$LANG_OPTION" "$FULLSCREEN_OPTION"
 else
     echo -e "${BLUE}${I18N_ST_LAUNCH_BIOS}${NC}"
     bash "${SCRIPT_DIR}/test-bios.sh" "$LANG_OPTION" "$FULLSCREEN_OPTION"
 fi
+
+
