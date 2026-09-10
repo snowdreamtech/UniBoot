@@ -3,6 +3,7 @@
         "gfxmode": "1280x800"
     },
     "control": [
+        { "VTOY_MENU_LANGUAGE": "zh_CN" },
         { "VTOY_FILE_FLT_EFI": "1" },
         { "VTOY_FILT_DOT_UNDERSCORE_FILE": "1" },
         { "VTOY_SORT_CASE_SENSITIVE": "0" },
