@@ -239,7 +239,7 @@ echo -e "${BLUE}Generating EFI boot image...${NC}"
 if [ -f "${IPXE_DIR}/ipxe-x86_64.efi" ]; then
     # Create a 16MB FAT image to safely hold all omni-arch EFI binaries
     dd if=/dev/zero of="${STAGING_DIR}/efiboot.img" bs=1K count=16384 status=none
-    mformat -i "${STAGING_DIR}/efiboot.img" -f 16384 ::
+    mformat -i "${STAGING_DIR}/efiboot.img" ::
     mmd -i "${STAGING_DIR}/efiboot.img" ::/EFI
     mmd -i "${STAGING_DIR}/efiboot.img" ::/EFI/BOOT
     
