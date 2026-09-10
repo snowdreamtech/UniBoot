@@ -1,7 +1,7 @@
 #!ipxe
 
-# 优先读取 U 盘本地的 uniboot.ipxe (0 秒秒开)
-# 如果本地没有，拉取云端的 uniboot.ipxe
-# 如果都失败，自动降级为官方 Netboot.xyz 主菜单
+# ⚠️ UEFI 环境下的原生 iPXE 无法读取 U 盘本地文件。
+# 1. 直接拉取云端最新的 uniboot.ipxe 菜单
+# 2. 如果因为网络原因拉取失败，自动降级为官方 Netboot.xyz 主菜单
 dhcp
-chain uniboot.ipxe || chain https://raw.githubusercontent.com/snowdreamtech/UniBoot/main/ipxe/uniboot.ipxe || chain https://boot.netboot.xyz/menu.ipxe
+chain https://raw.githubusercontent.com/snowdreamtech/UniBoot/main/ipxe/uniboot.ipxe || chain https://boot.netboot.xyz/menu.ipxe
