@@ -109,6 +109,16 @@ For commercial licensing and enterprise support, please contact SnowdreamTech In
 
 ---
 
+## Acknowledgements & Credits
+
+UniBoot is built on top of outstanding open-source projects. Special thanks to the creators and maintainers of:
+
+- **[Ventoy](https://www.ventoy.net/)**: An open-source tool to create bootable USB drives for ISO/WIM/IMG/VHD/EFI files. Ventoy serves as UniBoot's core local boot execution layer.
+- **[iPXE](https://ipxe.org/)**: An open-source network boot firmware providing HTTP(S), SAN, and scripting capabilities. iPXE serves as UniBoot's network execution engine.
+- **[netboot.xyz](https://netboot.xyz/)**: A powerful tool for booting operating system installers over the network. netboot.xyz inspires UniBoot's cloud boot ecosystem and fallback architecture.
+
+---
+
 ## Project Status
 
 Current status: Active Open-Source Development  

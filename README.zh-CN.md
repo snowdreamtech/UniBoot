@@ -109,6 +109,16 @@ UniBoot 企业版与云端服务提供：
 
 ---
 
+## 致敬与鸣谢（Acknowledgements & Credits）
+
+UniBoot 站在开源巨人的肩膀上。特别致敬并感谢以下开源项目的开发者与维护团队：
+
+- **[Ventoy](https://www.ventoy.net/)**：极其优秀的开源可引导 U 盘制作工具。Ventoy 作为 UniBoot 的本地引导执行层基础。
+- **[iPXE](https://ipxe.org/)**：强大灵活的开源网络引导固件。iPXE 作为 UniBoot 网络引导与云端脚本执行的核心引擎。
+- **[netboot.xyz](https://netboot.xyz/)**：深受开发者喜爱的网络操作系统引导平台。netboot.xyz 为 UniBoot 的云端网络引导生态和降级机制提供了灵感与参考。
+
+---
+
 ## 项目状态
 
 当前状态：开源活跃开发中（Active Open-Source Development）  
