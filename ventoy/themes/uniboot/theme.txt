@@ -10,6 +10,8 @@ desktop-color: "#070A12"
     top = 18%
     width = 80%
     height = 66%
+    item_font = "Unifont Regular 16"
+    selected_item_font = "Unifont Regular 16"
     item_color = "#FFFFFF"
     selected_item_color = "#00E5FF"
     item_height = 44
