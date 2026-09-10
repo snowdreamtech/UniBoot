@@ -238,12 +238,17 @@ done
 # Create EFI boot image (FAT filesystem) for UEFI boot
 echo -e "${BLUE}Generating EFI boot image...${NC}"
 if [ -f "${NETBOOT_DIR}/ipxe.efi" ]; then
-    # Create a 2.88MB FAT floppy image
-    dd if=/dev/zero of="${STAGING_DIR}/efiboot.img" bs=1K count=2880 status=none
-    mformat -i "${STAGING_DIR}/efiboot.img" -f 2880 ::
+    # Create a 4MB FAT image to hold both EFI binaries safely
+    dd if=/dev/zero of="${STAGING_DIR}/efiboot.img" bs=1K count=4096 status=none
+    mformat -i "${STAGING_DIR}/efiboot.img" -f 4096 ::
     mmd -i "${STAGING_DIR}/efiboot.img" ::/EFI
     mmd -i "${STAGING_DIR}/efiboot.img" ::/EFI/BOOT
+    
     mcopy -i "${STAGING_DIR}/efiboot.img" "${NETBOOT_DIR}/ipxe.efi" ::/EFI/BOOT/BOOTX64.EFI
+    
+    if [ -f "${NETBOOT_DIR}/ipxe-arm64.efi" ]; then
+        mcopy -i "${STAGING_DIR}/efiboot.img" "${NETBOOT_DIR}/ipxe-arm64.efi" ::/EFI/BOOT/BOOTAA64.EFI
+    fi
 else
     echo -e "${RED}Error: netboot/ipxe.efi not found.${NC}"
     exit 1
