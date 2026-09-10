@@ -1,12 +1,20 @@
-# UniBoot
+<p align="center">
+  <img src="assets/logo-banner.png" alt="UniBoot Banner" width="100%">
+</p>
+
+<p align="center">
+  <strong>打破边界，统一引导 —— 融合本地与云端网络的系统安装执行层</strong>
+</p>
+
+<p align="center">
+  <a href="README.md">English Version</a>
+</p>
 
 UniBoot 是一个统一引导执行层（Unified Boot Execution Layer），将本地引导、网络引导与官方安装器整合为一个轻量、安全、可扩展的系统安装平台。
 
 UniBoot 不分发任何系统镜像（ISO/WIM/DMG/IPSW）。  
 所有系统内容均由官方安装器从官方镜像源下载，并直接写入目标硬盘。  
 UniBoot 本身是一个执行层（Execution OS），而不是传统意义上的工具盘或系统盘。
-
-👉 英文版: [README.md](README.md)
 
 ---
 

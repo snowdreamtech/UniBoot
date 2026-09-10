@@ -1,12 +1,20 @@
-# UniBoot
+<p align="center">
+  <img src="assets/logo-banner.png" alt="UniBoot Banner" width="100%">
+</p>
+
+<p align="center">
+  <strong>A Unified Boot Execution Platform: Local Boot + Network Boot + Official Installers</strong>
+</p>
+
+<p align="center">
+  <a href="README.zh-CN.md">简体中文文档</a>
+</p>
 
 UniBoot is a Unified Boot Execution Layer that integrates local boot, network boot, and official OS installers into a single, lightweight, secure, and extensible system installation platform.
 
 UniBoot does NOT distribute any system images (ISO/WIM/DMG/IPSW).  
 All operating system content is downloaded directly from official sources and written to the target disk by official installers.  
 UniBoot itself is an Execution OS, not a traditional tool disk.
-
-👉 Chinese Version: [README.zh-CN.md](README.zh-CN.md)
 
 ---
 
