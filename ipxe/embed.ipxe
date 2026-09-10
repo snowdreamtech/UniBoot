@@ -1,7 +1,0 @@
-#!ipxe
-
-# ⚠️ Native iPXE in UEFI environment cannot read local USB files.
-# 1. Fetch the latest uniboot.ipxe menu directly from the cloud
-# 2. If network fetch fails, fallback to official Netboot.xyz main menu
-dhcp
-chain https://raw.githubusercontent.com/snowdreamtech/UniBoot/main/ipxe/uniboot.ipxe || chain https://boot.netboot.xyz/menu.ipxe

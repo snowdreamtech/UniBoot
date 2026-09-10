@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     paths:
-      - 'ipxe/embed.ipxe'
+      - 'ipxe/boot.ipxe'
 
 jobs:
   build:
@@ -31,7 +31,7 @@ jobs:
           cd /tmp/ipxe/src
           
           # Our custom embedded script path
-          EMBED_FILE="${GITHUB_WORKSPACE}/ipxe/embed.ipxe"
+          EMBED_FILE="${GITHUB_WORKSPACE}/ipxe/boot.ipxe"
           
           echo "Building x86_64 EFI..."
           make -j$(nproc) bin-x86_64-efi/ipxe.efi EMBED="${EMBED_FILE}"
