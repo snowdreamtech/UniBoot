@@ -222,13 +222,12 @@ LABEL uniboot
     INITRD /boot.ipxe
 ISOCFG
 
-# Copy iPXE binaries and script
-if [ -f "${NETBOOT_DIR}/ipxe.lkrn" ]; then
-    cp "${NETBOOT_DIR}/ipxe.lkrn" "${STAGING_DIR}/"
-else
-    echo -e "${RED}Error: netboot/ipxe.lkrn not found.${NC}"
-    exit 1
-fi
+# Copy all iPXE lkrn binaries
+for f in ipxe.lkrn ipxe-riscv32.lkrn ipxe-riscv64.lkrn; do
+    if [ -f "${NETBOOT_DIR}/${f}" ]; then
+        cp "${NETBOOT_DIR}/${f}" "${STAGING_DIR}/"
+    fi
+done
 
 # Copy local iPXE scripts for offline access
 for f in boot.ipxe uniboot.ipxe; do
