@@ -1,0 +1,70 @@
+name: Build iPXE EFI Binaries
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'ipxe/embed.ipxe'
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      
+    steps:
+      - name: Checkout UniBoot repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Install cross-compilers and dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-aarch64-linux-gnu gcc-arm-linux-gnueabi gcc-riscv64-linux-gnu gcc-loongarch64-linux-gnu gcc-multilib make perl liblzma-dev mtools
+          
+      - name: Checkout official iPXE repository
+        run: git clone --depth 1 https://github.com/ipxe/ipxe.git /tmp/ipxe
+        
+      - name: Build iPXE binaries with embedded script
+        run: |
+          cd /tmp/ipxe/src
+          
+          # Our custom embedded script path
+          EMBED_FILE="${GITHUB_WORKSPACE}/ipxe/embed.ipxe"
+          
+          echo "Building x86_64 EFI..."
+          make -j$(nproc) bin-x86_64-efi/ipxe.efi EMBED="${EMBED_FILE}"
+          cp bin-x86_64-efi/ipxe.efi "${GITHUB_WORKSPACE}/ipxe/ipxe-x86_64.efi"
+          
+          echo "Building i386 EFI..."
+          make -j$(nproc) bin-i386-efi/ipxe.efi EMBED="${EMBED_FILE}"
+          cp bin-i386-efi/ipxe.efi "${GITHUB_WORKSPACE}/ipxe/ipxe-i386.efi"
+          
+          echo "Building ARM64 EFI..."
+          make -j$(nproc) CROSS_COMPILE=aarch64-linux-gnu- bin-arm64-efi/ipxe.efi EMBED="${EMBED_FILE}"
+          cp bin-arm64-efi/ipxe.efi "${GITHUB_WORKSPACE}/ipxe/ipxe-arm64.efi"
+          
+          echo "Building ARM32 EFI..."
+          make -j$(nproc) CROSS_COMPILE=arm-linux-gnueabi- bin-arm32-efi/ipxe.efi EMBED="${EMBED_FILE}"
+          cp bin-arm32-efi/ipxe.efi "${GITHUB_WORKSPACE}/ipxe/ipxe-arm.efi"
+          
+          echo "Building RISC-V 64 EFI..."
+          make -j$(nproc) CROSS_COMPILE=riscv64-linux-gnu- bin-riscv64-efi/ipxe.efi EMBED="${EMBED_FILE}"
+          cp bin-riscv64-efi/ipxe.efi "${GITHUB_WORKSPACE}/ipxe/ipxe-riscv64.efi"
+          
+          echo "Building RISC-V 32 EFI..."
+          make -j$(nproc) CROSS_COMPILE=riscv64-linux-gnu- bin-riscv32-efi/ipxe.efi EMBED="${EMBED_FILE}"
+          cp bin-riscv32-efi/ipxe.efi "${GITHUB_WORKSPACE}/ipxe/ipxe-riscv32.efi"
+          
+          echo "Building LoongArch64 EFI..."
+          make -j$(nproc) CROSS_COMPILE=loongarch64-linux-gnu- bin-loongarch64-efi/ipxe.efi EMBED="${EMBED_FILE}"
+          cp bin-loongarch64-efi/ipxe.efi "${GITHUB_WORKSPACE}/ipxe/ipxe-loongarch64.efi"
+
+      - name: Commit newly compiled binaries
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore(ipxe): auto-compile multi-arch EFI binaries with embedded script"
+          file_pattern: "ipxe/*.efi"
+          commit_user_name: "github-actions[bot]"
+          commit_user_email: "github-actions[bot]@users.noreply.github.com"
