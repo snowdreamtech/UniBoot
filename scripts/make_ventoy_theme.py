@@ -7,7 +7,7 @@
 
 import os
 import sys
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.abspath(os.path.join(script_dir, ".."))
@@ -20,15 +20,19 @@ width, height = 1280, 800
 
 # 1. Base dark Canvas (#070A12)
 bg = Image.new("RGBA", (width, height), (7, 10, 18, 255))
-draw = ImageDraw.Draw(bg)
 
-# Soft ambient background glows
-for r in range(400, 0, -10):
-    alpha = int(10 * (r / 400))
-    # Muted cyan top-left
-    draw.ellipse([150 - r, 120 - r, 150 + r, 120 + r], fill=(0, 229, 255, alpha))
-    # Muted purple bottom-right
-    draw.ellipse([1100 - r, 680 - r, 1100 + r, 680 + r], fill=(124, 77, 255, alpha))
+# Create smooth Gaussian-blurred ambient glow layer
+glow_layer = Image.new("RGBA", (width, height), (0, 0, 0, 0))
+glow_draw = ImageDraw.Draw(glow_layer)
+
+# Draw soft cyan (top-left) & purple (bottom-right) ambient glow shapes
+glow_draw.ellipse([-100, -100, 500, 500], fill=(0, 229, 255, 70))
+glow_draw.ellipse([780, 380, 1380, 980], fill=(124, 77, 255, 70))
+
+# Apply ultra-soft Gaussian Blur
+glow_layer = glow_layer.filter(ImageFilter.GaussianBlur(radius=120))
+bg = Image.alpha_composite(bg, glow_layer)
+draw = ImageDraw.Draw(bg)
 
 # Top Header Bar (height 80)
 draw.rectangle([0, 0, width, 80], fill=(15, 23, 42, 245))
