@@ -6,10 +6,10 @@ desktop-image: "background.png"
 desktop-color: "#070A12"
 
 + boot_menu {
-    left = 120
-    top = 140
-    width = 1040
-    height = 530
+    left = 10%
+    top = 18%
+    width = 80%
+    height = 66%
     item_color = "#FFFFFF"
     selected_item_color = "#00E5FF"
     item_height = 44
@@ -20,9 +20,9 @@ desktop-color: "#070A12"
 
 + progress_bar {
     id = "__timeout__"
-    left = 120
-    top = 675
-    width = 1040
+    left = 10%
+    top = 85%
+    width = 80%
     height = 8
     show_text = true
     text_color = "#00E5FF"
