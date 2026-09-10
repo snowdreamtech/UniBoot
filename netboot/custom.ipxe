@@ -14,7 +14,7 @@ item --gap --             ---------------- Official Utilities (官方工具) ---
 item netboot_official     Official Netboot.xyz Menu (官方 Netboot.xyz 主菜单)
 item --gap --             ---------------- System Control (系统控制) ----------------
 item reboot               Reboot System (重启计算机)
-item exit                 Exit to Local Disk (返回本地硬盘)
+item exit                 Return to Ventoy / Exit (返回 Ventoy / 退出)
 choose custom_choice || goto custom_exit
 
 :ubuntu
