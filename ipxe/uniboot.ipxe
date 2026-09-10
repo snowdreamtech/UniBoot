@@ -5,6 +5,9 @@
 # Initialize network if not already configured
 isset ${ip} || dhcp || echo DHCP failed, network may be unavailable
 
+# Load UniBoot brand background picture (local USB first, GitHub cloud fallback)
+console --picture file:/ventoy/themes/uniboot/background.png || console --picture https://raw.githubusercontent.com/snowdreamtech/UniBoot/main/ventoy/themes/uniboot/background.png ||
+
 :custom
 clear custom_choice
 menu UniBoot - Unified Network Boot Platform
