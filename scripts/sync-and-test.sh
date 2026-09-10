@@ -80,11 +80,12 @@ fi
 echo -e "${BLUE}${I18N_ST_GEN_ISO}${NC}"
 bash "${SCRIPT_DIR}/make_uniboot_iso.sh"
 
-# 3. Perform Precise Sync (Sync ipxe, iso, ventoy, LICENSE and README files; exclude scripts, run.sh, .gitignore)
+# 3. Perform Precise Sync (Sync ipxe, assets, iso, ventoy, LICENSE and README files; exclude scripts, run.sh, .gitignore)
 echo -e "${BLUE}${I18N_ST_SYNCING}${NC}"
-mkdir -p "/Volumes/Ventoy/ipxe" "/Volumes/Ventoy/ventoy"
+mkdir -p "/Volumes/Ventoy/ipxe" "/Volumes/Ventoy/ventoy" "/Volumes/Ventoy/assets"
 rsync -av --delete "${SCRIPT_DIR}/../ipxe/" "/Volumes/Ventoy/ipxe/"
 rsync -av --delete "${SCRIPT_DIR}/../ventoy/" "/Volumes/Ventoy/ventoy/"
+[ -d "${SCRIPT_DIR}/../assets" ] && rsync -av --delete "${SCRIPT_DIR}/../assets/" "/Volumes/Ventoy/assets/"
 [ -d "${SCRIPT_DIR}/../iso" ] && rsync -av "${SCRIPT_DIR}/../iso" "/Volumes/Ventoy/"
 [ -f "${SCRIPT_DIR}/../LICENSE" ] && rsync -av "${SCRIPT_DIR}/../LICENSE" "/Volumes/Ventoy/"
 [ -f "${SCRIPT_DIR}/../README.md" ] && rsync -av "${SCRIPT_DIR}/../README.md" "/Volumes/Ventoy/"
