@@ -211,40 +211,41 @@ mkdir -p "${STAGING_DIR}/isolinux"
 cp "${ISOLINUX_DIR}/isolinux.bin" "${STAGING_DIR}/isolinux/"
 [ -f "${ISOLINUX_DIR}/ldlinux.c32" ] && cp "${ISOLINUX_DIR}/ldlinux.c32" "${STAGING_DIR}/isolinux/"
 
-# Create ISOLINUX config: auto-boot netboot.xyz.lkrn with zero delay
+# Create ISOLINUX config: auto-boot ipxe.lkrn with boot.ipxe as initrd
 cat > "${STAGING_DIR}/isolinux/isolinux.cfg" << 'ISOCFG'
 DEFAULT uniboot
 PROMPT 0
 TIMEOUT 0
 
 LABEL uniboot
-    LINUX /netboot.xyz.lkrn
+    LINUX /ipxe.lkrn
+    INITRD /boot.ipxe
 ISOCFG
 
-# Copy netboot payload
-if [ -f "${NETBOOT_DIR}/netboot.xyz.lkrn" ]; then
-    cp "${NETBOOT_DIR}/netboot.xyz.lkrn" "${STAGING_DIR}/"
+# Copy iPXE binaries and script
+if [ -f "${NETBOOT_DIR}/ipxe.lkrn" ]; then
+    cp "${NETBOOT_DIR}/ipxe.lkrn" "${STAGING_DIR}/"
 else
-    echo -e "${RED}Error: netboot/netboot.xyz.lkrn not found.${NC}"
+    echo -e "${RED}Error: netboot/ipxe.lkrn not found.${NC}"
     exit 1
 fi
 
 # Copy local iPXE scripts for offline access
-for f in boot.ipxe custom.ipxe; do
+for f in boot.ipxe uniboot.ipxe; do
     [ -f "${NETBOOT_DIR}/${f}" ] && cp "${NETBOOT_DIR}/${f}" "${STAGING_DIR}/"
 done
 
 # Create EFI boot image (FAT filesystem) for UEFI boot
 echo -e "${BLUE}Generating EFI boot image...${NC}"
-if [ -f "${NETBOOT_DIR}/netboot.xyz.efi" ]; then
+if [ -f "${NETBOOT_DIR}/ipxe.efi" ]; then
     # Create a 2.88MB FAT floppy image
     dd if=/dev/zero of="${STAGING_DIR}/efiboot.img" bs=1K count=2880 status=none
     mformat -i "${STAGING_DIR}/efiboot.img" -f 2880 ::
     mmd -i "${STAGING_DIR}/efiboot.img" ::/EFI
     mmd -i "${STAGING_DIR}/efiboot.img" ::/EFI/BOOT
-    mcopy -i "${STAGING_DIR}/efiboot.img" "${NETBOOT_DIR}/netboot.xyz.efi" ::/EFI/BOOT/BOOTX64.EFI
+    mcopy -i "${STAGING_DIR}/efiboot.img" "${NETBOOT_DIR}/ipxe.efi" ::/EFI/BOOT/BOOTX64.EFI
 else
-    echo -e "${RED}Error: netboot/netboot.xyz.efi not found.${NC}"
+    echo -e "${RED}Error: netboot/ipxe.efi not found.${NC}"
     exit 1
 fi
 
