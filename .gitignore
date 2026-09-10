@@ -91,10 +91,10 @@ local/iso/*
 *.qcow2
 
 # Network boot generated files
-netboot/menu.ipxe
-netboot/profiles/
-netboot/scripts/
-netboot/sources/
+ipxe/menu.ipxe
+ipxe/profiles/
+ipxe/scripts/
+ipxe/sources/
 
 # Bootloader binaries (not stored in repo)
 boot/EFI/

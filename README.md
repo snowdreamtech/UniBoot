@@ -58,7 +58,7 @@ UniBoot consists of three layers:
 ### 2. Network Execution Layer
 
 ```text
-/netboot/
+/ipxe/
 ├── menu.ipxe
 ├── profiles/
 ├── scripts/

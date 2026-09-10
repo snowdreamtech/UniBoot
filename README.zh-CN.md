@@ -57,7 +57,7 @@ UniBoot 由三层组成：
 ### 2. 网络执行层
 
 ```text
-/netboot/
+/ipxe/
 ├── menu.ipxe
 ├── profiles/
 ├── scripts/

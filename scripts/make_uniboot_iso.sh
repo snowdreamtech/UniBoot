@@ -10,7 +10,7 @@ set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
-OUTPUT_ISO="${PROJECT_ROOT}/netboot/UniBoot.iso"
+OUTPUT_ISO="${PROJECT_ROOT}/ipxe/UniBoot.iso"
 CACHE_DIR="${SCRIPT_DIR}/.cache"
 STAGING_DIR=""
 SYSLINUX_VERSION="6.03"
@@ -204,7 +204,7 @@ fi
 echo -e "${BLUE}[3/4] Preparing UniBoot ISO staging area...${NC}"
 
 STAGING_DIR=$(mktemp -d)
-NETBOOT_DIR="${PROJECT_ROOT}/netboot"
+IPXE_DIR="${PROJECT_ROOT}/ipxe"
 
 # Create ISOLINUX boot directory
 mkdir -p "${STAGING_DIR}/isolinux"
@@ -224,19 +224,19 @@ ISOCFG
 
 # Copy all iPXE lkrn binaries
 for f in ipxe.lkrn ipxe-riscv32.lkrn ipxe-riscv64.lkrn; do
-    if [ -f "${NETBOOT_DIR}/${f}" ]; then
-        cp "${NETBOOT_DIR}/${f}" "${STAGING_DIR}/"
+    if [ -f "${IPXE_DIR}/${f}" ]; then
+        cp "${IPXE_DIR}/${f}" "${STAGING_DIR}/"
     fi
 done
 
 # Copy local iPXE scripts for offline access
 for f in boot.ipxe uniboot.ipxe; do
-    [ -f "${NETBOOT_DIR}/${f}" ] && cp "${NETBOOT_DIR}/${f}" "${STAGING_DIR}/"
+    [ -f "${IPXE_DIR}/${f}" ] && cp "${IPXE_DIR}/${f}" "${STAGING_DIR}/"
 done
 
 # Create EFI boot image (FAT filesystem) for UEFI boot
 echo -e "${BLUE}Generating EFI boot image...${NC}"
-if [ -f "${NETBOOT_DIR}/ipxe-x86_64.efi" ]; then
+if [ -f "${IPXE_DIR}/ipxe-x86_64.efi" ]; then
     # Create a 16MB FAT image to safely hold all omni-arch EFI binaries
     dd if=/dev/zero of="${STAGING_DIR}/efiboot.img" bs=1K count=16384 status=none
     mformat -i "${STAGING_DIR}/efiboot.img" -f 16384 ::
@@ -244,15 +244,15 @@ if [ -f "${NETBOOT_DIR}/ipxe-x86_64.efi" ]; then
     mmd -i "${STAGING_DIR}/efiboot.img" ::/EFI/BOOT
     
     # Standard UEFI fallback filenames for different architectures
-    [ -f "${NETBOOT_DIR}/ipxe-x86_64.efi" ] && mcopy -i "${STAGING_DIR}/efiboot.img" "${NETBOOT_DIR}/ipxe-x86_64.efi" ::/EFI/BOOT/BOOTX64.EFI
-    [ -f "${NETBOOT_DIR}/ipxe-arm64.efi" ] && mcopy -i "${STAGING_DIR}/efiboot.img" "${NETBOOT_DIR}/ipxe-arm64.efi" ::/EFI/BOOT/BOOTAA64.EFI
-    [ -f "${NETBOOT_DIR}/ipxe-i386.efi" ] && mcopy -i "${STAGING_DIR}/efiboot.img" "${NETBOOT_DIR}/ipxe-i386.efi" ::/EFI/BOOT/BOOTIA32.EFI
-    [ -f "${NETBOOT_DIR}/ipxe-arm.efi" ] && mcopy -i "${STAGING_DIR}/efiboot.img" "${NETBOOT_DIR}/ipxe-arm.efi" ::/EFI/BOOT/BOOTARM.EFI
-    [ -f "${NETBOOT_DIR}/ipxe-riscv64.efi" ] && mcopy -i "${STAGING_DIR}/efiboot.img" "${NETBOOT_DIR}/ipxe-riscv64.efi" ::/EFI/BOOT/BOOTRISCV64.EFI
-    [ -f "${NETBOOT_DIR}/ipxe-riscv32.efi" ] && mcopy -i "${STAGING_DIR}/efiboot.img" "${NETBOOT_DIR}/ipxe-riscv32.efi" ::/EFI/BOOT/BOOTRISCV32.EFI
-    [ -f "${NETBOOT_DIR}/ipxe-loongarch64.efi" ] && mcopy -i "${STAGING_DIR}/efiboot.img" "${NETBOOT_DIR}/ipxe-loongarch64.efi" ::/EFI/BOOT/BOOTLOONGARCH64.EFI
+    [ -f "${IPXE_DIR}/ipxe-x86_64.efi" ] && mcopy -i "${STAGING_DIR}/efiboot.img" "${IPXE_DIR}/ipxe-x86_64.efi" ::/EFI/BOOT/BOOTX64.EFI
+    [ -f "${IPXE_DIR}/ipxe-arm64.efi" ] && mcopy -i "${STAGING_DIR}/efiboot.img" "${IPXE_DIR}/ipxe-arm64.efi" ::/EFI/BOOT/BOOTAA64.EFI
+    [ -f "${IPXE_DIR}/ipxe-i386.efi" ] && mcopy -i "${STAGING_DIR}/efiboot.img" "${IPXE_DIR}/ipxe-i386.efi" ::/EFI/BOOT/BOOTIA32.EFI
+    [ -f "${IPXE_DIR}/ipxe-arm.efi" ] && mcopy -i "${STAGING_DIR}/efiboot.img" "${IPXE_DIR}/ipxe-arm.efi" ::/EFI/BOOT/BOOTARM.EFI
+    [ -f "${IPXE_DIR}/ipxe-riscv64.efi" ] && mcopy -i "${STAGING_DIR}/efiboot.img" "${IPXE_DIR}/ipxe-riscv64.efi" ::/EFI/BOOT/BOOTRISCV64.EFI
+    [ -f "${IPXE_DIR}/ipxe-riscv32.efi" ] && mcopy -i "${STAGING_DIR}/efiboot.img" "${IPXE_DIR}/ipxe-riscv32.efi" ::/EFI/BOOT/BOOTRISCV32.EFI
+    [ -f "${IPXE_DIR}/ipxe-loongarch64.efi" ] && mcopy -i "${STAGING_DIR}/efiboot.img" "${IPXE_DIR}/ipxe-loongarch64.efi" ::/EFI/BOOT/BOOTLOONGARCH64.EFI
 else
-    echo -e "${RED}Error: netboot/ipxe-x86_64.efi not found.${NC}"
+    echo -e "${RED}Error: ipxe/ipxe-x86_64.efi not found.${NC}"
     exit 1
 fi
 
