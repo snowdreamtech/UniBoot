@@ -76,9 +76,7 @@ UniBoot 由三层组成：
 
 ## 许可协议
 
-UniBoot 使用专有闭源协议（UniBoot Proprietary License）。  
-未经授权禁止复制、修改、分发或商业使用。
-
+UniBoot 是基于 **GNU General Public License v2.0 (GPL-2.0-only)** 发布的开源软件。  
 详情请查看 [LICENSE](LICENSE)。
 
 ---
@@ -96,30 +94,28 @@ UniBoot 是一个系统执行层（Execution OS）。
 
 ---
 
-## 企业版
+## 企业版与 SaaS 服务
 
-UniBoot Enterprise 提供：
+UniBoot 企业版与云端服务提供：
 
-- 私有镜像源
-- 自动化安装流程
-- 版本控制
-- 企业策略管理
-- 离线部署
+- 私有镜像源与国内 CDN 节点加速
+- 云端动态菜单 API 控制台
+- 爱快 / Windows / Linux 自动化无人值守应答生成引擎
+- 企业策略管理与离线部署
 - 审计与日志
-- 品牌定制
+- 品牌与主题定制
 
-如需商业授权，请联系 SnowdreamTech Inc.（[snowdreamtech@qq.com](mailto:snowdreamtech@qq.com)）。
+如需商业授权或企业技术支持，请联系 SnowdreamTech Inc.（[snowdreamtech@qq.com](mailto:snowdreamtech@qq.com)）。
 
 ---
 
 ## 项目状态
 
-当前状态：开发中（In Development）  
-欢迎提出建议，但代码暂不公开。
+当前状态：开源活跃开发中（Active Open-Source Development）  
+欢迎提交 Issue 和 Pull Request 参与共建！
 
 ---
 
 ## 版权声明
 
-© 2026-present SnowdreamTech Inc. All rights reserved.  
-UniBoot 为专有软件。
+© 2026-present SnowdreamTech Inc. & iPXE authors. 保留所有权利。
