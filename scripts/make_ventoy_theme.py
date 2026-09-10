@@ -102,9 +102,9 @@ def main():
     draw.text((100, 46), slogan_text, fill=(0, 229, 255, 220), font=font_sub)
 
     # Deep high-contrast menu card container
-    # Canvas: 1280x800 -> [100, 120, 1180, 700] (left=7.8125%, top=15.0%, width=84.375%, height=72.5%)
-    # Aligns 1:1 with theme.txt percentage menu positioning: left=9.375%, top=17.5%, width=81.25%, height=66.25%
-    draw.rectangle([100, 120, 1180, 700], fill=(15, 23, 42, 245), outline=(51, 65, 85, 220), width=1)
+    # Canvas: 1280x800 -> [104, 128, 1176, 688]
+    # Aligns 1:1 with theme.txt integer percentage positioning: left=10%, top=18%, width=80%, height=66%
+    draw.rectangle([104, 128, 1176, 688], fill=(15, 23, 42, 245), outline=(51, 65, 85, 220), width=1)
 
     # Footer Bar (height 48)
     draw.rectangle([0, height - 48, width, height], fill=(15, 23, 42, 255))
