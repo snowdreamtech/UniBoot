@@ -12,16 +12,50 @@ YELLOW='\033[1;33m'
 RED='\033[0;31m'
 NC='\033[0m'
 
-LANG_OPTION="${1:-zh_CN}"
-FULLSCREEN_ARG="${2:-on}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Source i18n module
+if [ -f "${SCRIPT_DIR}/i18n.sh" ]; then
+    source "${SCRIPT_DIR}/i18n.sh"
+fi
+
+LANG_OPTION="zh_CN"
+FULLSCREEN_ARG="on"
+
+show_help() {
+    echo -e "${BLUE}${I18N_TU_TITLE}${NC}"
+    echo -e "${I18N_USAGE} ./test-uefi.sh [OPTIONS]... or [POSITIONAL_ARGS]..."
+    echo -e ""
+    echo -e "${I18N_OPTIONS}"
+    echo -e "  -l, --lang <lang>         ${I18N_LANG_DESC}"
+    echo -e "  -f, --fullscreen <on|off> ${I18N_FS_DESC}"
+    echo -e "  -h, --help                ${I18N_HELP_DESC}"
+    echo -e ""
+    echo -e "${I18N_SHORTCUT}"
+    echo -e "  ${I18N_SHORTCUT_DESC}"
+    echo -e "  Example: ./test-uefi.sh zh_CN off"
+    echo -e "=================================================="
+}
+
+while [[ "$#" -gt 0 ]]; do
+    case $1 in
+        --help|-h) show_help; exit 0 ;;
+        --lang|-l) LANG_OPTION="$2"; shift ;;
+        --fullscreen|-f) FULLSCREEN_ARG="$2"; shift ;;
+        zh_CN|en_US) LANG_OPTION="$1" ;;
+        on|off|fullscreen|full) FULLSCREEN_ARG="$1" ;;
+        *) echo "${I18N_UNKNOWN_PARAM} $1"; echo "${I18N_USE_HELP}"; exit 1 ;;
+    esac
+    shift
+done
 
 DISPLAY_OPT="cocoa,zoom-to-fit=on"
 if [[ "$FULLSCREEN_ARG" == "fullscreen" || "$FULLSCREEN_ARG" == "full" || "$FULLSCREEN_ARG" == "on" ]]; then
     DISPLAY_OPT="cocoa,full-screen=on,zoom-to-fit=on"
 fi
 
-echo -e "${BLUE}=== UniBoot Universal UEFI QEMU Tester ===${NC}"
-echo -e "${BLUE}Testing Language: ${LANG_OPTION} | Display: ${DISPLAY_OPT}${NC}"
+echo -e "${BLUE}${I18N_TU_TITLE}${NC}"
+echo -e "${BLUE}${I18N_TEST_LANG}: ${LANG_OPTION} | ${I18N_TEST_DISP}: ${DISPLAY_OPT}${NC}"
 
 # Detect Host OS
 OS_TYPE="unknown"
@@ -31,7 +65,7 @@ elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
     OS_TYPE="Linux"
 fi
 
-echo -e "${BLUE}Running on Host OS: ${OS_TYPE}${NC}"
+echo -e "${BLUE}${I18N_HOST_OS} ${OS_TYPE}${NC}"
 
 DISK_ID=""
 RAW_DRIVE=""
@@ -50,19 +84,19 @@ if [ "$OS_TYPE" == "macOS" ]; then
     fi
 
     if [ -z "$DISK_ID" ]; then
-        echo -e "${RED}Error: Ventoy USB drive not detected. Please insert USB drive.${NC}"
+        echo -e "${RED}${I18N_ERR_NO_USB}${NC}"
         exit 1
     fi
 
-    echo -e "${GREEN}Detected USB Disk: /dev/${DISK_ID}${NC}"
+    echo -e "${GREEN}${I18N_DETECTED_USB} /dev/${DISK_ID}${NC}"
     diskutil unmountDisk force "/dev/${DISK_ID}" || true
     sleep 1
     RAW_DRIVE="/dev/r${DISK_ID}"
 
     cleanup() {
-        echo -e "\n${YELLOW}[Clean Up] Re-mounting USB drive for macOS...${NC}"
+        echo -e "\n${YELLOW}${I18N_CLEANUP}${NC}"
         diskutil mountDisk "/dev/${DISK_ID}" || true
-        echo -e "${GREEN}USB drive remounted successfully.${NC}"
+        echo -e "${GREEN}${I18N_REMOUNT_OK}${NC}"
     }
     trap cleanup EXIT
 
@@ -70,10 +104,10 @@ if [ "$OS_TYPE" == "macOS" ]; then
 elif [ "$OS_TYPE" == "Linux" ]; then
     DISK_ID=$(lsblk -o NAME,LABEL -pn | grep "Ventoy" | head -n 1 | awk '{print $1}' | sed 's/[0-9]*$//')
     if [ -z "$DISK_ID" ]; then
-        echo -e "${RED}Error: Ventoy USB drive not detected.${NC}"
+        echo -e "${RED}${I18N_ERR_NO_USB}${NC}"
         exit 1
     fi
-    echo -e "${GREEN}Detected USB Disk: ${DISK_ID}${NC}"
+    echo -e "${GREEN}${I18N_DETECTED_USB} ${DISK_ID}${NC}"
     udisksctl unmount -b "${DISK_ID}1" || true
     RAW_DRIVE="${DISK_ID}"
 fi
@@ -96,7 +130,7 @@ mkdir -p "$AUTO_UEFI_DIR"
 printf "@echo -off\r\nset lang=${LANG_OPTION}\r\nFS1:\\EFI\\BOOT\\BOOTX64.EFI\r\nFS2:\\EFI\\BOOT\\BOOTX64.EFI\r\nFS3:\\EFI\\BOOT\\BOOTX64.EFI\r\nFS0:\\EFI\\BOOT\\BOOTX64.EFI\r\n" > "$AUTO_UEFI_DIR/startup.nsh"
 
 # QEMU Execution (Fully Automated UEFI Ventoy Launch with VirtIO VGA 1280x800 HD Window)
-echo -e "${BLUE}Launching QEMU UEFI Mode (VirtIO VGA HD 1280x800 Window Enabled)...${NC}"
+echo -e "${BLUE}${I18N_LAUNCHING_UEFI}${NC}"
 
 if [ "$OS_TYPE" == "macOS" ]; then
     if [ -f "$OVMF_FW" ]; then
@@ -146,4 +180,4 @@ elif [ "$OS_TYPE" == "Linux" ]; then
     fi
 fi
 
-echo -e "${GREEN}QEMU session finished.${NC}"
+echo -e "${GREEN}${I18N_SESSION_FIN}${NC}"
