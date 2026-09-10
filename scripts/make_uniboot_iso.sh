@@ -237,20 +237,23 @@ done
 
 # Create EFI boot image (FAT filesystem) for UEFI boot
 echo -e "${BLUE}Generating EFI boot image...${NC}"
-if [ -f "${NETBOOT_DIR}/ipxe.efi" ]; then
-    # Create a 4MB FAT image to hold both EFI binaries safely
-    dd if=/dev/zero of="${STAGING_DIR}/efiboot.img" bs=1K count=4096 status=none
-    mformat -i "${STAGING_DIR}/efiboot.img" -f 4096 ::
+if [ -f "${NETBOOT_DIR}/ipxe-x86_64.efi" ]; then
+    # Create a 16MB FAT image to safely hold all omni-arch EFI binaries
+    dd if=/dev/zero of="${STAGING_DIR}/efiboot.img" bs=1K count=16384 status=none
+    mformat -i "${STAGING_DIR}/efiboot.img" -f 16384 ::
     mmd -i "${STAGING_DIR}/efiboot.img" ::/EFI
     mmd -i "${STAGING_DIR}/efiboot.img" ::/EFI/BOOT
     
-    mcopy -i "${STAGING_DIR}/efiboot.img" "${NETBOOT_DIR}/ipxe.efi" ::/EFI/BOOT/BOOTX64.EFI
-    
-    if [ -f "${NETBOOT_DIR}/ipxe-arm64.efi" ]; then
-        mcopy -i "${STAGING_DIR}/efiboot.img" "${NETBOOT_DIR}/ipxe-arm64.efi" ::/EFI/BOOT/BOOTAA64.EFI
-    fi
+    # Standard UEFI fallback filenames for different architectures
+    [ -f "${NETBOOT_DIR}/ipxe-x86_64.efi" ] && mcopy -i "${STAGING_DIR}/efiboot.img" "${NETBOOT_DIR}/ipxe-x86_64.efi" ::/EFI/BOOT/BOOTX64.EFI
+    [ -f "${NETBOOT_DIR}/ipxe-arm64.efi" ] && mcopy -i "${STAGING_DIR}/efiboot.img" "${NETBOOT_DIR}/ipxe-arm64.efi" ::/EFI/BOOT/BOOTAA64.EFI
+    [ -f "${NETBOOT_DIR}/ipxe-i386.efi" ] && mcopy -i "${STAGING_DIR}/efiboot.img" "${NETBOOT_DIR}/ipxe-i386.efi" ::/EFI/BOOT/BOOTIA32.EFI
+    [ -f "${NETBOOT_DIR}/ipxe-arm.efi" ] && mcopy -i "${STAGING_DIR}/efiboot.img" "${NETBOOT_DIR}/ipxe-arm.efi" ::/EFI/BOOT/BOOTARM.EFI
+    [ -f "${NETBOOT_DIR}/ipxe-riscv64.efi" ] && mcopy -i "${STAGING_DIR}/efiboot.img" "${NETBOOT_DIR}/ipxe-riscv64.efi" ::/EFI/BOOT/BOOTRISCV64.EFI
+    [ -f "${NETBOOT_DIR}/ipxe-riscv32.efi" ] && mcopy -i "${STAGING_DIR}/efiboot.img" "${NETBOOT_DIR}/ipxe-riscv32.efi" ::/EFI/BOOT/BOOTRISCV32.EFI
+    [ -f "${NETBOOT_DIR}/ipxe-loongarch64.efi" ] && mcopy -i "${STAGING_DIR}/efiboot.img" "${NETBOOT_DIR}/ipxe-loongarch64.efi" ::/EFI/BOOT/BOOTLOONGARCH64.EFI
 else
-    echo -e "${RED}Error: netboot/ipxe.efi not found.${NC}"
+    echo -e "${RED}Error: netboot/ipxe-x86_64.efi not found.${NC}"
     exit 1
 fi
 
