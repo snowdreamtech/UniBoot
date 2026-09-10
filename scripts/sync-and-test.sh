@@ -22,7 +22,7 @@ fi
 
 TEST_MODE="bios"
 LANG_OPTION="zh_CN"
-FULLSCREEN_OPTION="on"
+FULLSCREEN_OPTION="off"
 
 show_help() {
     echo -e "${BLUE}${I18N_ST_TITLE}${NC}"

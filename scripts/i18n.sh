@@ -20,7 +20,7 @@ if [ $IS_ZH -eq 1 ]; then
     
     export I18N_MODE_DESC="设置启动测试模式。可选值: bios, uefi, both (默认: bios)"
     export I18N_LANG_DESC="设置界面语言。可选值: zh_CN, en_US (默认: zh_CN)"
-    export I18N_FS_DESC="是否开启 QEMU 全屏。可选值: on, off (默认: on)"
+    export I18N_FS_DESC="是否开启 QEMU 全屏。可选值: on, off (默认: off)"
     export I18N_HELP_DESC="显示此帮助信息并退出"
     
     # sync-and-test.sh strings
@@ -65,7 +65,7 @@ else
     
     export I18N_MODE_DESC="Set test mode. Supported: bios, uefi, both (Default: bios)"
     export I18N_LANG_DESC="Set display language. Supported: zh_CN, en_US (Default: zh_CN)"
-    export I18N_FS_DESC="Enable QEMU fullscreen. Supported: on, off (Default: on)"
+    export I18N_FS_DESC="Enable QEMU fullscreen. Supported: on, off (Default: off)"
     export I18N_HELP_DESC="Show this help message and exit"
     
     # sync-and-test.sh strings
