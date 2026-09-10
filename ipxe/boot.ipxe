@@ -4,7 +4,9 @@
 # Trigger build: FULL HTTPS + Commands for BIOS and EFI
 
 dhcp ||
-# 1. Fetch latest uniboot.ipxe menu directly from the cloud
-# 2. Fallback to official Netboot.xyz main menu
-# 3. Fallback to interactive iPXE shell
-chain https://raw.githubusercontent.com/snowdreamtech/UniBoot/main/ipxe/uniboot.ipxe || chain https://boot.netboot.xyz/menu.ipxe || shell
+# 1. Local-first: Fetch local uniboot.ipxe from USB
+# 2. Cloud fallback: Fetch latest uniboot.ipxe from GitHub
+# 3. Fallback to official Netboot.xyz main menu
+# 4. Fallback to interactive iPXE shell
+chain file:/ipxe/uniboot.ipxe || chain https://raw.githubusercontent.com/snowdreamtech/UniBoot/main/ipxe/uniboot.ipxe || chain https://boot.netboot.xyz/menu.ipxe || shell
+
