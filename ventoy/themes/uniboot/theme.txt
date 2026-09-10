@@ -4,6 +4,11 @@
 title-text: ""
 desktop-image: "background.png"
 desktop-color: "#070A12"
+terminal-left: "0"
+terminal-top: "0"
+terminal-width: "0"
+terminal-height: "0"
+terminal-border: "0"
 
 + boot_menu {
     left = 10%
