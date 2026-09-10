@@ -95,7 +95,7 @@ if [ "$OS_TYPE" == "macOS" ]; then
 
     cleanup() {
         echo -e "\n${YELLOW}${I18N_CLEANUP}${NC}"
-        diskutil mountDisk "/dev/${DISK_ID}" || true
+        diskutil mount "/dev/${DISK_ID}s1" &>/dev/null || diskutil mountDisk "/dev/${DISK_ID}" &>/dev/null || true
         echo -e "${GREEN}${I18N_REMOUNT_OK}${NC}"
     }
     trap cleanup EXIT
