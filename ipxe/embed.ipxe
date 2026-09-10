@@ -1,7 +1,7 @@
 #!ipxe
 
-# ⚠️ UEFI 环境下的原生 iPXE 无法读取 U 盘本地文件。
-# 1. 直接拉取云端最新的 uniboot.ipxe 菜单
-# 2. 如果因为网络原因拉取失败，自动降级为官方 Netboot.xyz 主菜单
+# ⚠️ Native iPXE in UEFI environment cannot read local USB files.
+# 1. Fetch the latest uniboot.ipxe menu directly from the cloud
+# 2. If network fetch fails, fallback to official Netboot.xyz main menu
 dhcp
 chain https://raw.githubusercontent.com/snowdreamtech/UniBoot/main/ipxe/uniboot.ipxe || chain https://boot.netboot.xyz/menu.ipxe
