@@ -77,9 +77,7 @@ UniBoot consists of three layers:
 
 ## License
 
-UniBoot is proprietary software under the UniBoot Proprietary License.  
-Unauthorized copying, modification, redistribution, or commercial use is prohibited.
-
+UniBoot is open-source software licensed under the **GNU General Public License v2.0 (GPL-2.0-only)**.  
 See [LICENSE](LICENSE) for details.
 
 ---
@@ -97,30 +95,27 @@ UniBoot is an Execution OS.
 
 ---
 
-## Enterprise Edition
+## Enterprise Edition & SaaS Services
 
-UniBoot Enterprise provides:
+UniBoot Enterprise and SaaS Services provide:
 
 - Private mirror support
-- Automated installation workflows
-- Version control
-- Deployment policies
-- Offline installation
-- Audit logging
-- Branding customization
+- Cloud dynamic menu API & SaaS Console
+- Automated installation workflows & Unattended script generators
+- Version control & deployment policies
+- Audit logging & branding customization
 
-For commercial licensing, please contact SnowdreamTech Inc. ([snowdreamtech@qq.com](mailto:snowdreamtech@qq.com)).
+For commercial licensing and enterprise support, please contact SnowdreamTech Inc. ([snowdreamtech@qq.com](mailto:snowdreamtech@qq.com)).
 
 ---
 
 ## Project Status
 
-Current status: In Development  
-Suggestions are welcome, but the source code is not public.
+Current status: Active Open-Source Development  
+Contributions and suggestions are welcome!
 
 ---
 
 ## Copyright
 
-© 2026-present SnowdreamTech Inc. All rights reserved.  
-UniBoot is proprietary software.
+© 2026-present SnowdreamTech Inc. and iPXE authors. All rights reserved.
