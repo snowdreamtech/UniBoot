@@ -211,16 +211,16 @@ IPXE_DIR="${PROJECT_ROOT}/ipxe"
 
 # Automatically synchronize boot.ipxe from uniboot.ipxe (Single Source of Truth)
 if [ -f "${IPXE_DIR}/uniboot.ipxe" ]; then
-    cat << 'EOF' > "${IPXE_DIR}/boot.ipxe"
-#!ipxe
-# UniBoot Embedded Entry & Menu Script
-# Copyright (c) 2026-present SnowdreamTech Inc.
+    cat << 'EOF' | sed 's/^[[:space:]]*//' > "${IPXE_DIR}/boot.ipxe"
+    #!ipxe
+    # UniBoot Embedded Entry & Menu Script
+    # Copyright (c) 2026-present SnowdreamTech Inc.
 
-# 1. Try chaining external customized uniboot.ipxe if present on local disk/USB (EFI mode)
-chain file:/ipxe/uniboot.ipxe 2>/dev/null || chain file:uniboot.ipxe 2>/dev/null ||
+    # 1. Try chaining external customized uniboot.ipxe if present on local disk/USB (EFI mode)
+    chain file:/ipxe/uniboot.ipxe 2>/dev/null || chain file:uniboot.ipxe 2>/dev/null ||
 
-# 2. Embedded UniBoot Menu (Runs 100% offline without external dependencies)
-:menu_start
+    # 2. Embedded UniBoot Menu (Runs 100% offline without external dependencies)
+    :menu_start
 EOF
     tail -n +5 "${IPXE_DIR}/uniboot.ipxe" >> "${IPXE_DIR}/boot.ipxe"
 fi
