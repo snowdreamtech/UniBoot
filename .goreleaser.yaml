@@ -8,7 +8,9 @@
 version: 2
 project_name: uniboot
 
-report_sizes: true
+builds:
+  - id: default
+    skip: true
 
 git:
   ignore_tags:
