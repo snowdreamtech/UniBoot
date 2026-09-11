@@ -27,6 +27,7 @@ checksum:
 release:
   name_template: "{{ .Tag }}"
   prerelease: auto
+  mode: keep
   github:
     owner: snowdreamtech
     name: UniBoot
