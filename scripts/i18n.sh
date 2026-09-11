@@ -21,6 +21,7 @@ if [ $IS_ZH -eq 1 ]; then
     export I18N_MODE_DESC="设置启动测试模式。可选值: bios, uefi, both (默认: bios)"
     export I18N_LANG_DESC="设置界面语言。可选值: zh_CN, en_US (默认: zh_CN)"
     export I18N_FS_DESC="是否开启 QEMU 全屏。可选值: on, off (默认: off)"
+    export I18N_REBUILD_DESC="是否重新本地编译 iPXE 固件。可选值: on, off (默认: off)"
     export I18N_HELP_DESC="显示此帮助信息并退出"
     
     # sync-and-test.sh strings
@@ -28,6 +29,8 @@ if [ $IS_ZH -eq 1 ]; then
     export I18N_ST_TARGET_MODE="目标模式"
     export I18N_ST_LANG="语言"
     export I18N_ST_FS="全屏"
+    export I18N_ST_REBUILD="重新编译 iPXE"
+    export I18N_ST_REBUILDING_IPXE="正在重新本地编译 iPXE 固件 (EFI + LKRN)..."
     export I18N_ST_MOUNTING="正在尝试查找并挂载 U 盘..."
     export I18N_ST_ERR_UNMOUNTED="错误: /Volumes/Ventoy 未挂载。请重新插入 U 盘。"
     export I18N_ST_GEN_ISO="正在生成 UniBoot Universal Hybrid ISO..."
@@ -67,6 +70,7 @@ else
     export I18N_MODE_DESC="Set test mode. Supported: bios, uefi, both (Default: bios)"
     export I18N_LANG_DESC="Set display language. Supported: zh_CN, en_US (Default: zh_CN)"
     export I18N_FS_DESC="Enable QEMU fullscreen. Supported: on, off (Default: off)"
+    export I18N_REBUILD_DESC="Rebuild iPXE binaries locally. Supported: on, off (Default: off)"
     export I18N_HELP_DESC="Show this help message and exit"
     
     # sync-and-test.sh strings
@@ -74,6 +78,8 @@ else
     export I18N_ST_TARGET_MODE="Target Mode"
     export I18N_ST_LANG="Language"
     export I18N_ST_FS="Fullscreen"
+    export I18N_ST_REBUILD="Rebuild iPXE"
+    export I18N_ST_REBUILDING_IPXE="Rebuilding iPXE binaries locally (EFI + LKRN)..."
     export I18N_ST_MOUNTING="Attempting to locate and mount USB drive..."
     export I18N_ST_ERR_UNMOUNTED="Error: /Volumes/Ventoy is not mounted. Please re-insert USB."
     export I18N_ST_GEN_ISO="Generating UniBoot Universal Hybrid ISO..."
