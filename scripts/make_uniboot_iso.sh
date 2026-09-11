@@ -250,11 +250,12 @@ for f in ipxe.lkrn ipxe-riscv32.lkrn ipxe-riscv64.lkrn; do
     fi
 done
 
-# Copy local iPXE scripts for offline access (under /ipxe/ path)
-mkdir -p "${STAGING_DIR}/ipxe"
-for f in boot.ipxe uniboot.ipxe; do
+# Copy local iPXE scripts and background picture for offline access
+mkdir -p "${STAGING_DIR}/ipxe" "${STAGING_DIR}/ventoy/themes/uniboot"
+for f in boot.ipxe uniboot.ipxe background.png; do
     [ -f "${IPXE_DIR}/${f}" ] && cp "${IPXE_DIR}/${f}" "${STAGING_DIR}/ipxe/"
 done
+[ -f "${PROJECT_ROOT}/ventoy/themes/uniboot/background.png" ] && cp "${PROJECT_ROOT}/ventoy/themes/uniboot/background.png" "${STAGING_DIR}/ventoy/themes/uniboot/"
 
 # Create EFI boot image (FAT filesystem) for UEFI boot
 echo -e "${BLUE}Generating EFI boot image...${NC}"
@@ -265,6 +266,9 @@ if [ -f "${IPXE_DIR}/ipxe-x86_64.efi" ]; then
     mmd -i "${STAGING_DIR}/efiboot.img" ::/EFI
     mmd -i "${STAGING_DIR}/efiboot.img" ::/EFI/BOOT
     mmd -i "${STAGING_DIR}/efiboot.img" ::/ipxe
+    mmd -i "${STAGING_DIR}/efiboot.img" ::/ventoy
+    mmd -i "${STAGING_DIR}/efiboot.img" ::/ventoy/themes
+    mmd -i "${STAGING_DIR}/efiboot.img" ::/ventoy/themes/uniboot
     
     # Standard UEFI fallback filenames for different architectures
     [ -f "${IPXE_DIR}/ipxe-x86_64.efi" ] && mcopy -i "${STAGING_DIR}/efiboot.img" "${IPXE_DIR}/ipxe-x86_64.efi" ::/EFI/BOOT/BOOTX64.EFI
@@ -275,8 +279,10 @@ if [ -f "${IPXE_DIR}/ipxe-x86_64.efi" ]; then
     [ -f "${IPXE_DIR}/ipxe-riscv32.efi" ] && mcopy -i "${STAGING_DIR}/efiboot.img" "${IPXE_DIR}/ipxe-riscv32.efi" ::/EFI/BOOT/BOOTRISCV32.EFI
     [ -f "${IPXE_DIR}/ipxe-loongarch64.efi" ] && mcopy -i "${STAGING_DIR}/efiboot.img" "${IPXE_DIR}/ipxe-loongarch64.efi" ::/EFI/BOOT/BOOTLOONGARCH64.EFI
 
-    # Copy local iPXE script into FAT image so UEFI mode file: protocol finds uniboot.ipxe
+    # Copy local iPXE script & theme assets into FAT image so UEFI mode finds uniboot.ipxe and background.png
     [ -f "${IPXE_DIR}/uniboot.ipxe" ] && mcopy -i "${STAGING_DIR}/efiboot.img" "${IPXE_DIR}/uniboot.ipxe" ::/ipxe/uniboot.ipxe
+    [ -f "${IPXE_DIR}/background.png" ] && mcopy -i "${STAGING_DIR}/efiboot.img" "${IPXE_DIR}/background.png" ::/ipxe/background.png
+    [ -f "${PROJECT_ROOT}/ventoy/themes/uniboot/background.png" ] && mcopy -i "${STAGING_DIR}/efiboot.img" "${PROJECT_ROOT}/ventoy/themes/uniboot/background.png" ::/ventoy/themes/uniboot/background.png
 else
     echo -e "${RED}Error: ipxe/ipxe-x86_64.efi not found.${NC}"
     exit 1
