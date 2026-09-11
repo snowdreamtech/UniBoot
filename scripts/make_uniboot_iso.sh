@@ -226,6 +226,20 @@ if [ -f "${IPXE_DIR}/uniboot.ipxe" ]; then
     :menu_start
 EOF
     tail -n +5 "${IPXE_DIR}/uniboot.ipxe" >> "${IPXE_DIR}/boot.ipxe"
+else
+    cat << 'EOF' | sed 's/^[[:space:]]*//' > "${IPXE_DIR}/boot.ipxe"
+    #!ipxe
+    # UniBoot Fallback Network Boot Script
+    # Copyright (c) 2026-present SnowdreamTech Inc.
+
+    # 1. Try chaining external customized uniboot.ipxe if present on local disk/USB (EFI mode)
+    chain file:/ipxe/uniboot.ipxe 2>/dev/null || chain file:uniboot.ipxe 2>/dev/null ||
+
+    # 2. Cloud Fallback Mode (Fetch latest netboot.xyz cloud menu)
+    isset ${ip} || dhcp ||
+    chain --autofree https://boot.netboot.xyz/menu.ipxe || chain --autofree http://boot.netboot.xyz/menu.ipxe || shell
+EOF
+    echo -e "${YELLOW}${I18N_WARN_UNIBOOT_IPXE_MISSING}${NC}"
 fi
 
 # Create ISOLINUX boot directory

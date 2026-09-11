@@ -187,18 +187,33 @@ jobs:
       - name: Build iPXE binaries with embedded script
         run: |
           # Automatically synchronize boot.ipxe from uniboot.ipxe (Single Source of Truth)
-          cat << 'EOF' | sed 's/^[[:space:]]*//' > "${GITHUB_WORKSPACE}/ipxe/boot.ipxe"
-          #!ipxe
-          # UniBoot Embedded Entry & Menu Script
-          # Copyright (c) 2026-present SnowdreamTech Inc.
+          if [ -f "${GITHUB_WORKSPACE}/ipxe/uniboot.ipxe" ]; then
+              cat << 'EOF' | sed 's/^[[:space:]]*//' > "${GITHUB_WORKSPACE}/ipxe/boot.ipxe"
+              #!ipxe
+              # UniBoot Embedded Entry & Menu Script
+              # Copyright (c) 2026-present SnowdreamTech Inc.
 
-          # 1. Try chaining external customized uniboot.ipxe if present on local disk/USB (EFI mode)
-          chain file:/ipxe/uniboot.ipxe 2>/dev/null || chain file:uniboot.ipxe 2>/dev/null ||
+              # 1. Try chaining external customized uniboot.ipxe if present on local disk/USB (EFI mode)
+              chain file:/ipxe/uniboot.ipxe 2>/dev/null || chain file:uniboot.ipxe 2>/dev/null ||
 
-          # 2. Embedded UniBoot Menu (Runs 100% offline without external dependencies)
-          :menu_start
+              # 2. Embedded UniBoot Menu (Runs 100% offline without external dependencies)
+              :menu_start
           EOF
-          tail -n +5 "${GITHUB_WORKSPACE}/ipxe/uniboot.ipxe" >> "${GITHUB_WORKSPACE}/ipxe/boot.ipxe"
+              tail -n +5 "${GITHUB_WORKSPACE}/ipxe/uniboot.ipxe" >> "${GITHUB_WORKSPACE}/ipxe/boot.ipxe"
+          else
+              cat << 'EOF' | sed 's/^[[:space:]]*//' > "${GITHUB_WORKSPACE}/ipxe/boot.ipxe"
+              #!ipxe
+              # UniBoot Fallback Network Boot Script
+              # Copyright (c) 2026-present SnowdreamTech Inc.
+
+              # 1. Try chaining external customized uniboot.ipxe if present on local disk/USB (EFI mode)
+              chain file:/ipxe/uniboot.ipxe 2>/dev/null || chain file:uniboot.ipxe 2>/dev/null ||
+
+              # 2. Cloud Fallback Mode (Fetch latest netboot.xyz cloud menu)
+              isset ${ip} || dhcp ||
+              chain --autofree https://boot.netboot.xyz/menu.ipxe || chain --autofree http://boot.netboot.xyz/menu.ipxe || shell
+          EOF
+          fi
 
           cd /tmp/ipxe/src
           
