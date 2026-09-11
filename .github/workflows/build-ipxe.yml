@@ -1,6 +1,14 @@
-name: Build iPXE Binaries (EFI + LKRN)
+# Copyright (c) 2026 SnowdreamTech. All rights reserved.
+# Licensed under the MIT License. See LICENSE file in the project root for full license information.
 
-on:
+---
+# iPXE Multi-Arch Compilation (EFI + LKRN)
+# Purpose: Cross-compiles omni-architecture EFI binaries and LKRN kernel payloads with embedded UniBoot scripts.
+# Trigger: Automated on pushes to dev branch modifying ipxe/** or workflow; manually via workflow_dispatch.
+
+name: "🔨 Build iPXE Binaries (EFI + LKRN)"
+
+"on":
   workflow_dispatch:
   push:
     branches:
@@ -9,19 +17,23 @@ on:
       - 'ipxe/**'
       - '.github/workflows/build-ipxe.yml'
 
+permissions:
+  contents: write
+  id-token: write
+  statuses: write
+
 jobs:
   build:
+    name: "🔨 Multi-Arch iPXE Compilation"
     runs-on: ubuntu-24.04
-    permissions:
-      contents: write
-      
+
     steps:
-      - name: Checkout UniBoot repository
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: "📂 Checkout Repository Code"
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           
-      - name: Install cross-compilers and dependencies
+      - name: "🛠️ Install Cross-Compilers and Dependencies"
         run: |
           sudo apt-get update
           sudo apt-get install -y \
@@ -34,7 +46,7 @@ jobs:
           sudo ln -sf /usr/bin/loongarch64-linux-gnu-gcc-13 /usr/bin/loongarch64-linux-gnu-gcc
           # NOTE: gcc-i686-linux-gnu replaces gcc-multilib - no conflicts with other cross-compilers.
           
-      - name: Checkout official iPXE repository
+      - name: "🌐 Checkout Official iPXE Repository"
         run: |
           # Lock iPXE to verified stable commit SHA (v2.0.0+ / ff6e520)
           IPXE_COMMIT="ff6e52063e0b37062394fe37b9788af25175e7af"
@@ -42,7 +54,7 @@ jobs:
           cd /tmp/ipxe
           git checkout "${IPXE_COMMIT}"
 
-      - name: Enable ALL protocols, commands, image formats, and features in iPXE config
+      - name: "⚙️ Enable Protocols, Commands and Features in iPXE Config"
         run: |
           # Remove all platform #undef overrides in iPXE core headers so BIOS/LKRN builds get HTTPS & full features
           sed -i 's/^[[:space:]]*#undef/\/\/#undef/g' /tmp/ipxe/src/config/general.h
@@ -184,7 +196,7 @@ jobs:
           #endif
           EOF
 
-      - name: Build iPXE binaries with embedded script
+      - name: "🔨 Build Multi-Arch iPXE Binaries with Embedded Script"
         run: |
           # Automatically synchronize boot.ipxe from uniboot.ipxe (Single Source of Truth)
           if [ -f "${GITHUB_WORKSPACE}/ipxe/uniboot.ipxe" ]; then
@@ -258,11 +270,12 @@ jobs:
           make -j$(nproc) NO_WERROR=1 CROSS_COMPILE=riscv64-linux-gnu- bin-riscv32-efi/ipxe.efi EMBED="${EMBED_FILE}" || true
           [ -f bin-riscv32-efi/ipxe.efi ] && cp bin-riscv32-efi/ipxe.efi "${GITHUB_WORKSPACE}/ipxe/ipxe-riscv32.efi" || true
           
+          # ── LoongArch64 EFI ──────────────────────────────────────────────────
           echo "Building LoongArch64 EFI..."
           make -j$(nproc) NO_WERROR=1 CROSS_COMPILE=loongarch64-linux-gnu- bin-loong64-efi/ipxe.efi EMBED="${EMBED_FILE}"
           cp bin-loong64-efi/ipxe.efi "${GITHUB_WORKSPACE}/ipxe/ipxe-loongarch64.efi"
 
-      - name: Commit newly compiled binaries
+      - name: "🚀 Commit and Push Compiled iPXE Binaries"
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
