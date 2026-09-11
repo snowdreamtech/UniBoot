@@ -57,15 +57,59 @@ fi
 echo -e "${BLUE}${I18N_TU_TITLE}${NC}"
 echo -e "${BLUE}${I18N_TEST_LANG}: ${LANG_OPTION} | ${I18N_TEST_DISP}: ${DISPLAY_OPT}${NC}"
 
+SUDO=""
+if [ "$(id -u)" -ne 0 ] && command -v sudo &>/dev/null; then
+    SUDO="sudo"
+fi
+
 # Detect Host OS
 OS_TYPE="unknown"
 if [[ "$OSTYPE" == "darwin"* ]]; then
     OS_TYPE="macOS"
-elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+elif [[ "$OSTYPE" == "linux-gnu"* ]] || [[ "$OSTYPE" == "linux"* ]]; then
     OS_TYPE="Linux"
+elif [[ "$OSTYPE" == "msys"* ]] || [[ "$OSTYPE" == "cygwin"* ]] || [[ "$OSTYPE" == "mingw"* ]]; then
+    OS_TYPE="Windows"
 fi
 
 echo -e "${BLUE}${I18N_HOST_OS} ${OS_TYPE}${NC}"
+
+install_qemu() {
+    echo -e "${YELLOW}qemu-system-x86_64 not found. Auto-installing QEMU...${NC}"
+    if [ "$OS_TYPE" == "macOS" ]; then
+        if command -v brew &>/dev/null; then
+            brew install qemu
+        elif command -v port &>/dev/null; then
+            $SUDO port install qemu
+        fi
+    elif [ "$OS_TYPE" == "Linux" ]; then
+        if command -v apt-get &>/dev/null; then
+            $SUDO apt-get update -qq && $SUDO apt-get install -y qemu-system-x86 ovmf udisks2
+        elif command -v dnf &>/dev/null; then
+            $SUDO dnf install -y qemu-kvm qemu-system-x86 edk2-ovmf
+        elif command -v apk &>/dev/null; then
+            $SUDO apk add qemu-system-x86_64 ovmf
+        elif command -v pacman &>/dev/null; then
+            $SUDO pacman -S --noconfirm qemu-desktop ovmf
+        elif command -v zypper &>/dev/null; then
+            $SUDO zypper install -y qemu-x86 ovmf
+        fi
+    elif [ "$OS_TYPE" == "Windows" ]; then
+        if command -v winget.exe &>/dev/null; then
+            winget.exe install QEMU.QEMU 2>/dev/null || true
+        fi
+    fi
+}
+
+command -v qemu-system-x86_64 &>/dev/null || install_qemu
+
+DISPLAY_OPT="default"
+if [ "$OS_TYPE" == "macOS" ]; then
+    DISPLAY_OPT="cocoa,zoom-to-fit=on"
+    if [[ "$FULLSCREEN_ARG" == "fullscreen" || "$FULLSCREEN_ARG" == "full" || "$FULLSCREEN_ARG" == "on" ]]; then
+        DISPLAY_OPT="cocoa,full-screen=on,zoom-to-fit=on"
+    fi
+fi
 
 DISK_ID=""
 RAW_DRIVE=""
@@ -102,27 +146,35 @@ if [ "$OS_TYPE" == "macOS" ]; then
 
 # Linux Smart Disk Detection & Unmount
 elif [ "$OS_TYPE" == "Linux" ]; then
-    DISK_ID=$(lsblk -o NAME,LABEL -pn | grep "Ventoy" | head -n 1 | awk '{print $1}' | sed 's/[0-9]*$//')
+    if command -v lsblk &>/dev/null; then
+        DISK_ID=$(lsblk -o NAME,LABEL -pn | grep "Ventoy" | head -n 1 | awk '{print $1}' | sed 's/[0-9]*$//')
+    fi
     if [ -z "$DISK_ID" ]; then
         echo -e "${RED}${I18N_ERR_NO_USB}${NC}"
         exit 1
     fi
     echo -e "${GREEN}${I18N_DETECTED_USB} ${DISK_ID}${NC}"
-    udisksctl unmount -b "${DISK_ID}1" || true
+    command -v udisksctl &>/dev/null && udisksctl unmount -b "${DISK_ID}1" 2>/dev/null || true
     RAW_DRIVE="${DISK_ID}"
 fi
 
 # Locate UEFI Firmware
 OVMF_FW=""
-if [ "$OS_TYPE" == "macOS" ]; then
-    OVMF_FW="/opt/local/share/qemu/edk2-x86_64-code.fd"
-elif [ "$OS_TYPE" == "Linux" ]; then
-    if [ -f "/usr/share/OVMF/OVMF_CODE.fd" ]; then
-        OVMF_FW="/usr/share/OVMF/OVMF_CODE.fd"
-    elif [ -f "/usr/share/ovmf/OVMF.fd" ]; then
-        OVMF_FW="/usr/share/ovmf/OVMF.fd"
+SEARCH_OVMF=(
+    "/opt/local/share/qemu/edk2-x86_64-code.fd"
+    "/opt/homebrew/share/qemu/edk2-x86_64-code.fd"
+    "/usr/share/OVMF/OVMF_CODE.fd"
+    "/usr/share/ovmf/OVMF.fd"
+    "/usr/share/qemu/ovmf-x86_64-code.bin"
+    "/usr/share/edk2/ovmf/OVMF_CODE.fd"
+    "/usr/share/edk2-ovmf/x64/OVMF_CODE.fd"
+)
+for fw in "${SEARCH_OVMF[@]}"; do
+    if [ -f "$fw" ]; then
+        OVMF_FW="$fw"
+        break
     fi
-fi
+done
 
 # Prepare VFAT Auto-Boot Helper Disk for QEMU UEFI with Language Variable Injection
 AUTO_UEFI_DIR="/tmp/uniboot_uefi_auto"
@@ -133,8 +185,8 @@ printf "@echo -off\r\nset lang=${LANG_OPTION}\r\nFS1:\\EFI\\BOOT\\BOOTX64.EFI\r\
 echo -e "${BLUE}${I18N_LAUNCHING_UEFI}${NC}"
 
 if [ "$OS_TYPE" == "macOS" ]; then
-    if [ -f "$OVMF_FW" ]; then
-        sudo qemu-system-x86_64 \
+    if [ -n "$OVMF_FW" ]; then
+        $SUDO qemu-system-x86_64 \
             -machine q35 \
             -m 2048 \
             -device virtio-vga,xres=1280,yres=800 \
@@ -145,7 +197,7 @@ if [ "$OS_TYPE" == "macOS" ]; then
             -drive "file=fat:rw:$AUTO_UEFI_DIR,format=raw" \
             -drive "file=$RAW_DRIVE,format=raw"
     else
-        sudo qemu-system-x86_64 \
+        $SUDO qemu-system-x86_64 \
             -machine q35 \
             -m 2048 \
             -device virtio-vga,xres=1280,yres=800 \
@@ -157,10 +209,10 @@ if [ "$OS_TYPE" == "macOS" ]; then
     fi
 elif [ "$OS_TYPE" == "Linux" ]; then
     if [ -n "$OVMF_FW" ]; then
-        sudo qemu-system-x86_64 \
+        $SUDO qemu-system-x86_64 \
             -machine q35 \
             -m 2048 \
-            -enable-kvm \
+            -enable-kvm 2>/dev/null || true \
             -device virtio-vga,xres=1280,yres=800 \
             -netdev user,id=net0 \
             -device e1000,netdev=net0 \
@@ -168,10 +220,9 @@ elif [ "$OS_TYPE" == "Linux" ]; then
             -drive "file=fat:rw:$AUTO_UEFI_DIR,format=raw" \
             -drive "file=$RAW_DRIVE,format=raw"
     else
-        sudo qemu-system-x86_64 \
+        $SUDO qemu-system-x86_64 \
             -machine q35 \
             -m 2048 \
-            -enable-kvm \
             -device virtio-vga,xres=1280,yres=800 \
             -netdev user,id=net0 \
             -device e1000,netdev=net0 \

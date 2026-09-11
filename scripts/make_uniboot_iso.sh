@@ -20,6 +20,11 @@ OUTPUT_ISO="${PROJECT_ROOT}/iso/UniBoot.iso"
 CACHE_DIR="${SCRIPT_DIR}/.cache"
 STAGING_DIR=""
 
+SUDO=""
+if [ "$(id -u)" -ne 0 ] && command -v sudo &>/dev/null; then
+    SUDO="sudo"
+fi
+
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
 YELLOW='\033[1;33m'
@@ -56,7 +61,7 @@ install_iso_tool() {
     if [[ "$OSTYPE" == "darwin"* ]]; then
         if command -v port &>/dev/null; then
             echo -e "${BLUE}Detected MacPorts. Installing xorriso and mtools...${NC}"
-            sudo port install xorriso mtools
+            $SUDO port install xorriso mtools
         elif command -v brew &>/dev/null; then
             echo -e "${BLUE}Detected Homebrew. Installing xorriso and mtools...${NC}"
             brew install xorriso mtools
@@ -66,26 +71,28 @@ install_iso_tool() {
         fi
     elif [[ "$OSTYPE" == "linux-gnu"* ]] || [[ "$OSTYPE" == "linux"* ]]; then
         if command -v apt-get &>/dev/null; then
-            sudo apt-get update -qq && sudo apt-get install -y genisoimage mtools
+            $SUDO apt-get update -qq && $SUDO apt-get install -y genisoimage mtools curl
         elif command -v dnf &>/dev/null; then
-            sudo dnf install -y genisoimage mtools
+            $SUDO dnf install -y genisoimage mtools curl
         elif command -v yum &>/dev/null; then
-            sudo yum install -y genisoimage mtools
+            $SUDO yum install -y genisoimage mtools curl
         elif command -v apk &>/dev/null; then
-            sudo apk add xorriso mtools
+            $SUDO apk add xorriso mtools curl
         elif command -v pacman &>/dev/null; then
-            sudo pacman -S --noconfirm cdrtools mtools
+            $SUDO pacman -S --noconfirm cdrtools mtools curl
         elif command -v zypper &>/dev/null; then
-            sudo zypper install -y genisoimage mtools
+            $SUDO zypper install -y genisoimage mtools curl
         else
             echo -e "${RED}Error: Unsupported Linux distribution.${NC}"
             exit 1
         fi
-    elif [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "cygwin" ]]; then
+    elif [[ "$OSTYPE" == "msys"* ]] || [[ "$OSTYPE" == "cygwin"* ]] || [[ "$OSTYPE" == "mingw"* ]]; then
         if command -v pacman &>/dev/null; then
             pacman -S --noconfirm mingw-w64-x86_64-cdrtools mtools 2>/dev/null || pacman -S --noconfirm cdrtools mtools
+        elif command -v winget.exe &>/dev/null; then
+            winget.exe install -e --id GNU.mtools 2>/dev/null || true
         else
-            echo -e "${RED}Error: On Windows, please use MSYS2 or WSL.${NC}"
+            echo -e "${RED}Error: On Windows, please use MSYS2, Git Bash with pacman, or WSL.${NC}"
             exit 1
         fi
     else
@@ -95,7 +102,7 @@ install_iso_tool() {
 }
 
 ISO_TOOL=""
-if ISO_TOOL=$(find_iso_tool) && command -v mcopy &>/dev/null; then
+if ISO_TOOL=$(find_iso_tool) && command -v mcopy &>/dev/null && command -v mformat &>/dev/null; then
     echo -e "${GREEN}[1/4] Found ISO tool: ${ISO_TOOL} and mtools${NC}"
 else
     install_iso_tool
