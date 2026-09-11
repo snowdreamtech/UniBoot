@@ -1,0 +1,87 @@
+# Copyright (c) 2026 SnowdreamTech. All rights reserved.
+# Licensed under the MIT License. See LICENSE file in the project root for full license information.
+
+---
+# yaml-language-server: $schema=https://goreleaser.com/static/schema.json
+# vim: set ts=2 sw=2 tw=0 fo=cnqoj
+
+version: 2
+project_name: uniboot
+
+report_sizes: true
+
+git:
+  ignore_tags:
+    - nightly
+    - "*-nightly"
+
+before:
+  hooks:
+    - bash scripts/make_uniboot_iso.sh
+
+checksum:
+  name_template: "checksums.txt"
+
+release:
+  name_template: "{{ .Tag }}"
+  prerelease: auto
+  github:
+    owner: snowdreamtech
+    name: UniBoot
+  # Publish standalone EFI binaries, LKRN kernels, iPXE scripts, and UniBoot.iso directly as Release assets
+  extra_files:
+    - glob: "./ipxe/*.efi"
+    - glob: "./ipxe/*.lkrn"
+    - glob: "./ipxe/*.ipxe"
+    - glob: "./iso/*.iso"
+  header: |
+    **UniBoot** is a Unified Boot Execution Layer integrating local boot, network boot, and official OS installers.
+
+    **Release Assets:**
+    - 🚀 **UEFI Bootloaders (.efi)**: `ipxe-x86_64.efi`, `ipxe-i386.efi`, `ipxe-arm64.efi`, `ipxe-arm.efi`, `ipxe-riscv64.efi`, `ipxe-riscv32.efi`, `ipxe-loongarch64.efi`
+    - 🐧 **Legacy BIOS Kernels (.lkrn)**: `ipxe.lkrn`, `ipxe-riscv64.lkrn`, `ipxe-riscv32.lkrn`
+    - 💿 **Hybrid Bootable ISO**: `UniBoot.iso` (18 MB execution OS)
+    - 📜 **iPXE Scripts**: `uniboot.ipxe`, `boot.ipxe`
+  footer: |
+    **Full Changelog**: https://github.com/snowdreamtech/UniBoot/compare/{{ .PreviousTag }}...{{ .Tag }}
+
+changelog:
+  sort: asc
+  use: github
+  filters:
+    exclude:
+      - "(?i)^test"
+      - "(?i)^ci"
+      - "(?i)^build"
+      - "(?i)^style"
+      - "(?i)^revert"
+      - "(?i)^chore"
+      - "(?i)^deps"
+      - "^Merge pull request"
+      - "^Merge remote-tracking branch"
+      - "^Merge branch"
+      - "merge conflict"
+      - "^WIP"
+      - "^\\[skip ci\\]"
+      - "^Bump version"
+  groups:
+    - title: "🚀 Features"
+      regexp: "^.*(?i)feat[(\\w)]*:+.*$"
+      order: 100
+    - title: "🐛 Bug Fixes"
+      regexp: "^.*(?i)fix[(\\w)]*:+.*$"
+      order: 200
+    - title: "⚡️ Performance Improvements"
+      regexp: "^.*(?i)perf[(\\w)]*:+.*$"
+      order: 300
+    - title: "🛠 Refactoring"
+      regexp: "^.*(?i)refactor[(\\w)]*:+.*$"
+      order: 400
+    - title: "🛡️ Security Updates"
+      regexp: "^.*(?i)(sec|security)[(\\w)]*:+.*$"
+      order: 600
+    - title: "📖 Documentation"
+      regexp: "^.*(?i)docs[(\\w)]*:+.*$"
+      order: 700
+    - title: "♻️ Miscellaneous Chores"
+      order: 9999
