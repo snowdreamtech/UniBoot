@@ -10,6 +10,11 @@ set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+
+# Source i18n module
+if [ -f "${SCRIPT_DIR}/i18n.sh" ]; then
+    source "${SCRIPT_DIR}/i18n.sh"
+fi
 OUTPUT_ISO="${PROJECT_ROOT}/iso/UniBoot.iso"
 CACHE_DIR="${SCRIPT_DIR}/.cache"
 STAGING_DIR=""
@@ -211,8 +216,8 @@ mkdir -p "${STAGING_DIR}/isolinux"
 cp "${ISOLINUX_DIR}/isolinux.bin" "${STAGING_DIR}/isolinux/"
 [ -f "${ISOLINUX_DIR}/ldlinux.c32" ] && cp "${ISOLINUX_DIR}/ldlinux.c32" "${STAGING_DIR}/isolinux/"
 
-# Create ISOLINUX config: lkrn has boot.ipxe embedded at compile time, no INITRD needed
-cat > "${STAGING_DIR}/isolinux/isolinux.cfg" << 'ISOCFG'
+# Create ISOLINUX config: conditionally include INITRD only if uniboot.ipxe exists
+cat > "${STAGING_DIR}/isolinux/isolinux.cfg" << ISOCFG
 DEFAULT uniboot
 PROMPT 0
 TIMEOUT 0
@@ -228,9 +233,10 @@ for f in ipxe.lkrn ipxe-riscv32.lkrn ipxe-riscv64.lkrn; do
     fi
 done
 
-# Copy local iPXE scripts for offline access
+# Copy local iPXE scripts for offline access (under /ipxe/ path)
+mkdir -p "${STAGING_DIR}/ipxe"
 for f in boot.ipxe uniboot.ipxe; do
-    [ -f "${IPXE_DIR}/${f}" ] && cp "${IPXE_DIR}/${f}" "${STAGING_DIR}/"
+    [ -f "${IPXE_DIR}/${f}" ] && cp "${IPXE_DIR}/${f}" "${STAGING_DIR}/ipxe/"
 done
 
 # Create EFI boot image (FAT filesystem) for UEFI boot
