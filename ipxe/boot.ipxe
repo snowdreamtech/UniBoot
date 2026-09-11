@@ -1,12 +1,57 @@
 #!ipxe
-# UniBoot Entry Script
+# UniBoot Embedded Entry & Menu Script
 # Copyright (c) 2026-present SnowdreamTech Inc.
-# Trigger build: FULL HTTPS + Commands for BIOS and EFI
 
-dhcp ||
-# 1. Local-first: Fetch local uniboot.ipxe from USB
-# 2. Cloud fallback: Fetch latest uniboot.ipxe from GitHub
-# 3. Fallback to official Netboot.xyz main menu
-# 4. Fallback to interactive iPXE shell
-chain file:/ipxe/uniboot.ipxe || chain https://raw.githubusercontent.com/snowdreamtech/UniBoot/main/ipxe/uniboot.ipxe || chain https://boot.netboot.xyz/menu.ipxe || shell
+# 1. Try chaining external customized uniboot.ipxe if present on local disk/USB (EFI mode)
+chain file:/ipxe/uniboot.ipxe 2>/dev/null || chain file:uniboot.ipxe 2>/dev/null ||
 
+# 2. Embedded UniBoot Menu (Runs 100% offline without external dependencies)
+:menu_start
+isset ${ip} || dhcp ||
+
+colour --rgb 0x00E5FF 6 ||
+colour --rgb 0xFFFFFF 7 ||
+colour --rgb 0x070A12 0 ||
+cpair --foreground 7 --background 0 0 ||
+cpair --foreground 6 --background 0 1 ||
+
+console --picture file:/ventoy/themes/uniboot/background.png --left 128 --right 128 --top 144 --bottom 128 || console --picture file:/ipxe/background.png --left 128 --right 128 --top 144 --bottom 128 || console --picture file:background.png --left 128 --right 128 --top 144 --bottom 128 ||
+
+:custom
+clear custom_choice
+menu UniBoot - Unified Network Boot Platform
+item --gap --             ---------------- Operating Systems ----------------
+item ubuntu               Install Ubuntu Linux
+item debian               Install Debian Linux
+item fedora               Install Fedora Linux
+item win11                Install Windows 11 Official
+item --gap --             ---------------- Official Tools ----------------
+item netboot_official     Official Netboot.xyz Main Menu
+item --gap --             ---------------- System Control ----------------
+item reboot               Reboot System
+item exit                 Return to Ventoy / Exit
+choose custom_choice || goto custom_exit
+
+:ubuntu
+chain https://boot.netboot.xyz/ubuntu.ipxe
+
+:debian
+chain https://boot.netboot.xyz/debian.ipxe
+
+:fedora
+chain https://boot.netboot.xyz/fedora.ipxe
+
+:win11
+chain https://boot.netboot.xyz/windows.ipxe
+
+:netboot_official
+chain https://boot.netboot.xyz/menu.ipxe
+
+:reboot
+reboot
+
+:exit
+exit
+
+:custom_exit
+exit 0
