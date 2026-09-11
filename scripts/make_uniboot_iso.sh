@@ -13,16 +13,12 @@ PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
 # Source i18n module
 if [ -f "${SCRIPT_DIR}/i18n.sh" ]; then
+    # shellcheck disable=SC1091
     source "${SCRIPT_DIR}/i18n.sh"
 fi
 OUTPUT_ISO="${PROJECT_ROOT}/iso/UniBoot.iso"
 CACHE_DIR="${SCRIPT_DIR}/.cache"
 STAGING_DIR=""
-SYSLINUX_VERSION="6.03"
-# Original URL (often blocked/slow in China):
-# SYSLINUX_URL="https://mirrors.edge.kernel.org/pub/linux/utils/boot/syslinux/syslinux-${SYSLINUX_VERSION}.tar.gz"
-# Use a domestic mirror (Tsinghua TUNA) for stability in China
-SYSLINUX_URL="https://mirrors.tuna.tsinghua.edu.cn/kernel/linux/utils/boot/syslinux/syslinux-${SYSLINUX_VERSION}.tar.gz"
 
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
@@ -261,6 +257,7 @@ if [ -f "${IPXE_DIR}/ipxe-x86_64.efi" ]; then
     mformat -i "${STAGING_DIR}/efiboot.img" ::
     mmd -i "${STAGING_DIR}/efiboot.img" ::/EFI
     mmd -i "${STAGING_DIR}/efiboot.img" ::/EFI/BOOT
+    mmd -i "${STAGING_DIR}/efiboot.img" ::/ipxe
     
     # Standard UEFI fallback filenames for different architectures
     [ -f "${IPXE_DIR}/ipxe-x86_64.efi" ] && mcopy -i "${STAGING_DIR}/efiboot.img" "${IPXE_DIR}/ipxe-x86_64.efi" ::/EFI/BOOT/BOOTX64.EFI
@@ -270,6 +267,9 @@ if [ -f "${IPXE_DIR}/ipxe-x86_64.efi" ]; then
     [ -f "${IPXE_DIR}/ipxe-riscv64.efi" ] && mcopy -i "${STAGING_DIR}/efiboot.img" "${IPXE_DIR}/ipxe-riscv64.efi" ::/EFI/BOOT/BOOTRISCV64.EFI
     [ -f "${IPXE_DIR}/ipxe-riscv32.efi" ] && mcopy -i "${STAGING_DIR}/efiboot.img" "${IPXE_DIR}/ipxe-riscv32.efi" ::/EFI/BOOT/BOOTRISCV32.EFI
     [ -f "${IPXE_DIR}/ipxe-loongarch64.efi" ] && mcopy -i "${STAGING_DIR}/efiboot.img" "${IPXE_DIR}/ipxe-loongarch64.efi" ::/EFI/BOOT/BOOTLOONGARCH64.EFI
+
+    # Copy local iPXE script into FAT image so UEFI mode file: protocol finds uniboot.ipxe
+    [ -f "${IPXE_DIR}/uniboot.ipxe" ] && mcopy -i "${STAGING_DIR}/efiboot.img" "${IPXE_DIR}/uniboot.ipxe" ::/ipxe/uniboot.ipxe
 else
     echo -e "${RED}Error: ipxe/ipxe-x86_64.efi not found.${NC}"
     exit 1
