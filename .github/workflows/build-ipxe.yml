@@ -236,6 +236,10 @@ jobs:
           echo "Building x86 BIOS lkrn..."
           make -j$(nproc) NO_WERROR=1 CROSS_COMPILE=i686-linux-gnu- bin/ipxe.lkrn EMBED="${EMBED_FILE}"
           cp bin/ipxe.lkrn "${GITHUB_WORKSPACE}/ipxe/ipxe.lkrn"
+
+          echo "Building x86 BIOS undionly.kpxe..."
+          make -j$(nproc) NO_WERROR=1 CROSS_COMPILE=i686-linux-gnu- bin/undionly.kpxe EMBED="${EMBED_FILE}"
+          cp bin/undionly.kpxe "${GITHUB_WORKSPACE}/ipxe/undionly.kpxe"
           
           echo "Building RISC-V 64 lkrn..."
           make -j$(nproc) NO_WERROR=1 CROSS_COMPILE=riscv64-linux-gnu- bin-riscv64/ipxe.lkrn EMBED="${EMBED_FILE}"
@@ -279,10 +283,10 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add ipxe/*.lkrn ipxe/*.efi
+          git add ipxe/*.lkrn ipxe/*.efi ipxe/*.kpxe
           if git diff --staged --quiet; then
             echo "No changes to commit."
           else
-            git commit -m "chore(ipxe): auto-compile lkrn and multi-arch EFI binaries with embedded script"
+            git commit -m "chore(ipxe): auto-compile lkrn, kpxe and multi-arch EFI binaries with embedded script"
             git push
           fi

@@ -35,6 +35,7 @@ release:
   extra_files:
     - glob: "./ipxe/*.efi"
     - glob: "./ipxe/*.lkrn"
+    - glob: "./ipxe/*.kpxe"
     - glob: "./ipxe/*.ipxe"
     - glob: "./iso/*.iso"
   header: |
@@ -43,6 +44,7 @@ release:
     **Release Assets:**
     - 🚀 **UEFI Bootloaders (.efi)**: `ipxe-x86_64.efi`, `ipxe-i386.efi`, `ipxe-arm64.efi`, `ipxe-arm.efi`, `ipxe-riscv64.efi`, `ipxe-riscv32.efi`, `ipxe-loongarch64.efi`
     - 🐧 **Legacy BIOS Kernels (.lkrn)**: `ipxe.lkrn`, `ipxe-riscv64.lkrn`, `ipxe-riscv32.lkrn`
+    - 🌐 **Legacy PXE ROM (.kpxe)**: `undionly.kpxe`
     - 💿 **Hybrid Bootable ISO**: `UniBoot.iso` (18 MB execution OS)
     - 📜 **iPXE Scripts**: `uniboot.ipxe`, `boot.ipxe`
   footer: |
