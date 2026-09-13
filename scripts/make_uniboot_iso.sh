@@ -266,7 +266,7 @@ done
 
 # Copy local iPXE scripts and background picture for offline access
 mkdir -p "${STAGING_DIR}/ipxe" "${STAGING_DIR}/ventoy/themes/uniboot"
-for f in boot.ipxe uniboot.ipxe background.png; do
+for f in boot.ipxe uniboot.ipxe background.png undionly.kpxe; do
     [ -f "${IPXE_DIR}/${f}" ] && cp "${IPXE_DIR}/${f}" "${STAGING_DIR}/ipxe/"
 done
 [ -f "${PROJECT_ROOT}/ventoy/themes/uniboot/background.png" ] && cp "${PROJECT_ROOT}/ventoy/themes/uniboot/background.png" "${STAGING_DIR}/ventoy/themes/uniboot/"
