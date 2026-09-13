@@ -303,6 +303,10 @@ echo -e "${BLUE}Compiling x86 BIOS lkrn...${NC}"
 make -j"${NPROC}" NO_WERROR=1 CROSS_COMPILE=i686-linux-gnu- bin/ipxe.lkrn EMBED="${EMBED_FILE}"
 cp bin/ipxe.lkrn "${OUTPUT_DIR}/ipxe.lkrn"
 
+echo -e "${BLUE}Compiling x86 BIOS undionly.kpxe...${NC}"
+make -j"${NPROC}" NO_WERROR=1 CROSS_COMPILE=i686-linux-gnu- bin/undionly.kpxe EMBED="${EMBED_FILE}"
+cp bin/undionly.kpxe "${OUTPUT_DIR}/undionly.kpxe"
+
 echo -e "${BLUE}Compiling RISC-V 64 lkrn...${NC}"
 make -j"${NPROC}" NO_WERROR=1 CROSS_COMPILE=riscv64-linux-gnu- bin-riscv64/ipxe.lkrn EMBED="${EMBED_FILE}"
 cp bin-riscv64/ipxe.lkrn "${OUTPUT_DIR}/ipxe-riscv64.lkrn"
@@ -350,7 +354,7 @@ if [ "$INSIDE_CONTAINER" -eq 1 ]; then
 fi
 
 # 6. Verify critical binary artifacts
-CRITICAL_ARTIFACTS=("ipxe.lkrn" "ipxe-x86_64.efi" "ipxe-arm64.efi")
+CRITICAL_ARTIFACTS=("ipxe.lkrn" "undionly.kpxe" "ipxe-x86_64.efi" "ipxe-arm64.efi")
 for artifact in "${CRITICAL_ARTIFACTS[@]}"; do
     if [ ! -s "${OUTPUT_DIR}/${artifact}" ]; then
         echo -e "${RED}Error: Critical compilation output missing or empty: ${OUTPUT_DIR}/${artifact}${NC}"
