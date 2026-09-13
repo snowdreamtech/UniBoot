@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.0.0](https://github.com/snowdreamtech/UniBoot/compare/v1.0.0...v1.0.0) (2026-09-13)
+
+
+### 🚀 Features
+
+* **ipxe:** add undionly.kpxe compilation target and ISO staging support ([7b1029b](https://github.com/snowdreamtech/UniBoot/commit/7b1029bc5aab9402358dd3a5f886f64e0e1411fa))
+* **scripts:** add local iPXE cross-compilation script and --rebuild-ipxe option to sync-and-test.sh ([73da965](https://github.com/snowdreamtech/UniBoot/commit/73da965075a67c41a3df3faa08b9eef78a3881f6))
+
+
+### ♻️ Miscellaneous Chores
+
+* **ipxe:** auto-compile lkrn, kpxe and multi-arch EFI binaries with embedded script ([ba824c8](https://github.com/snowdreamtech/UniBoot/commit/ba824c821bf81908c8a6751f145935c909caea26))
+
 ## [1.0.0](https://github.com/snowdreamtech/UniBoot/compare/v1.0.0...v1.0.0) (2026-09-11)
 
 
