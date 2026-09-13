@@ -37,6 +37,7 @@ release:
     - glob: "./ipxe/*.lkrn"
     - glob: "./ipxe/*.kpxe"
     - glob: "./ipxe/*.ipxe"
+    - glob: "./ipxe/*.png"
     - glob: "./iso/*.iso"
   header: |
     **UniBoot** is a Unified Boot Execution Layer integrating local boot, network boot, and official OS installers.
@@ -47,6 +48,7 @@ release:
     - 🌐 **Legacy PXE ROM (.kpxe)**: `undionly.kpxe`
     - 💿 **Hybrid Bootable ISO**: `UniBoot.iso` (18 MB execution OS)
     - 📜 **iPXE Scripts**: `uniboot.ipxe`, `boot.ipxe`
+    - 🖼️ **Theme Assets (.png)**: `background.png`
   footer: |
     **Full Changelog**: https://github.com/snowdreamtech/UniBoot/compare/{{ .PreviousTag }}...{{ .Tag }}
 
