@@ -14,13 +14,16 @@ colour --rgb 0x94A3B8 8 ||
 # cpair 1: Section headers -> Muted Gray (#94A3B8) text on Dark BG
 # cpair 2: Selected item -> Ventoy Cyan (#00E5FF) text on Deep Slate (#1E293B) Row BG
 # cpair 3: Footer text -> Muted Gray (#94A3B8) text on Dark BG
-cpair 0 6 0 ||
-cpair 1 8 0 ||
-cpair 2 6 1 ||
-cpair 3 8 0 ||
+cpair --foreground 6 --background 0 0 ||
+cpair --foreground 8 --background 0 1 ||
+cpair --foreground 6 --background 1 2 ||
+cpair --foreground 8 --background 0 3 ||
 
 # Load UniBoot background image with exact Ventoy card container margins
 console --picture file:/ventoy/themes/uniboot/background.png --left 120 --right 120 --top 140 --bottom 128 || console --picture file:/ipxe/background.png --left 120 --right 120 --top 140 --bottom 128 || console --picture file:/background.png --left 120 --right 120 --top 140 --bottom 128 || console --picture file:background.png --left 120 --right 120 --top 140 --bottom 128 ||
+
+# Initialize network if not already configured
+isset ${ip} || dhcp || echo DHCP failed, network may be unavailable
 
 # Try a local customization first. If it is unavailable, use the network center.
 chain file:/ipxe/uniboot.ipxe 2>/dev/null || chain file:uniboot.ipxe 2>/dev/null ||
