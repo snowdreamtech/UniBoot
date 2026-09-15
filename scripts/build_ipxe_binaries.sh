@@ -283,14 +283,9 @@ EOF
 
 # 4. Prepare embedded script
 EMBED_FILE="${PROJECT_ROOT}/ipxe/boot.ipxe"
-if [ ! -f "${EMBED_FILE}" ]; then
-    EMBED_FILE="/tmp/boot.ipxe"
-    cat > "${EMBED_FILE}" << 'EOF'
-#!ipxe
-chain file:/ipxe/uniboot.ipxe 2>/dev/null || chain file:uniboot.ipxe 2>/dev/null ||
-isset ${ip} || dhcp ||
-chain --autofree https://boot.netboot.xyz/menu.ipxe || shell
-EOF
+if ! bash "${SCRIPT_DIR}/generate_boot_ipxe.sh"; then
+    echo -e "${RED}Failed to generate ipxe/boot.ipxe.${NC}"
+    exit 1
 fi
 
 cd "${BUILD_DIR}/src"

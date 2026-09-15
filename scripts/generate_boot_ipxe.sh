@@ -1,3 +1,20 @@
+#!/usr/bin/env bash
+
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+IPXE_DIR="${PROJECT_ROOT}/ipxe"
+OUTPUT_FILE="${IPXE_DIR}/boot.ipxe"
+UNIBOOT_FILE="${IPXE_DIR}/uniboot.ipxe"
+TEMP_FILE="$(mktemp "${OUTPUT_FILE}.tmp.XXXXXX")"
+
+cleanup() {
+    rm -f "${TEMP_FILE}"
+}
+trap cleanup EXIT
+
+cat > "${TEMP_FILE}" << 'EOF'
 #!ipxe
 # UniBoot Embedded Entry Script
 # Copyright (c) 2026-present SnowdreamTech Inc.
@@ -24,9 +41,17 @@ console --picture file:/ventoy/themes/uniboot/background.png --left 120 --right 
 
 # Try a local customization first. If it is unavailable, use the network center.
 chain file:/ipxe/uniboot.ipxe 2>/dev/null || chain file:uniboot.ipxe 2>/dev/null ||
-#!ipxe
-# UniBoot Custom iPXE Menu
-# Copyright (c) 2026-present SnowdreamTech Inc.
+EOF
 
-# Enter the network center.
+if [ -f "${UNIBOOT_FILE}" ]; then
+    cat "${UNIBOOT_FILE}" >> "${TEMP_FILE}"
+else
+    cat >> "${TEMP_FILE}" << 'EOF'
+
+# Enter the network center when no local customization is available.
 chain https://boot.netboot.xyz/menu.ipxe
+EOF
+fi
+
+mv "${TEMP_FILE}" "${OUTPUT_FILE}"
+trap - EXIT
