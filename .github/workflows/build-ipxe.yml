@@ -15,6 +15,7 @@ name: "🔨 Build iPXE Binaries (EFI + LKRN)"
       - dev
     paths:
       - "ipxe/**"
+      - "scripts/**"
       - ".github/workflows/build-ipxe.yml"
 
 permissions:
@@ -263,7 +264,7 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add ipxe/*.lkrn ipxe/*.efi ipxe/*.kpxe
+          git add ipxe/boot.ipxe ipxe/*.lkrn ipxe/*.efi ipxe/*.kpxe
           if git diff --staged --quiet; then
             echo "No changes to commit."
           else
