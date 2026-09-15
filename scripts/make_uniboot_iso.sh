@@ -212,39 +212,12 @@ fi
 STAGING_DIR=$(mktemp -d)
 IPXE_DIR="${PROJECT_ROOT}/ipxe"
 
-# Build the embedded entry script and append the complete local network entry.
-if [ -f "${IPXE_DIR}/uniboot.ipxe" ]; then
-    cat << 'EOF' | sed 's/^[[:space:]]*//' > "${IPXE_DIR}/boot.ipxe"
-    #!ipxe
-    # UniBoot Embedded Entry Script
-    # Copyright (c) 2026-present SnowdreamTech Inc.
-
-    # Configure iPXE Framebuffer Palette to match Ventoy theme 1:1
-    colour --rgb 0x070A12 0 ||
-    colour --rgb 0x1E293B 1 ||
-    colour --rgb 0x00E5FF 6 ||
-    colour --rgb 0x94A3B8 8 ||
-    cpair 0 6 0 ||
-    cpair 1 8 0 ||
-    cpair 2 6 1 ||
-    cpair 3 8 0 ||
-    console --picture file:/ventoy/themes/uniboot/background.png --left 120 --right 120 --top 140 --bottom 128 || console --picture file:/ipxe/background.png --left 120 --right 120 --top 140 --bottom 128 || console --picture file:/background.png --left 120 --right 120 --top 140 --bottom 128 || console --picture file:background.png --left 120 --right 120 --top 140 --bottom 128 ||
-    chain file:/ipxe/uniboot.ipxe 2>/dev/null || chain file:uniboot.ipxe 2>/dev/null ||
-EOF
-    cat "${IPXE_DIR}/uniboot.ipxe" >> "${IPXE_DIR}/boot.ipxe"
-else
-    cat << 'EOF' | sed 's/^[[:space:]]*//' > "${IPXE_DIR}/boot.ipxe"
-    #!ipxe
-    # UniBoot Fallback Network Boot Script
-    # Copyright (c) 2026-present SnowdreamTech Inc.
-
-    # 1. Try chaining external customized uniboot.ipxe if present on local disk/USB (EFI mode)
-    chain file:/ipxe/uniboot.ipxe 2>/dev/null || chain file:uniboot.ipxe 2>/dev/null ||
-
-    # 2. Cloud Fallback Mode (Fetch latest netboot.xyz cloud menu)
-    isset ${ip} || dhcp ||
-    chain --autofree https://boot.netboot.xyz/menu.ipxe || chain --autofree http://boot.netboot.xyz/menu.ipxe || shell
-EOF
+# Generate the embedded entry script from the single shared generator.
+if ! bash "${SCRIPT_DIR}/generate_boot_ipxe.sh"; then
+    echo -e "${RED}Failed to generate ipxe/boot.ipxe.${NC}"
+    exit 1
+fi
+if [ ! -f "${IPXE_DIR}/uniboot.ipxe" ]; then
     echo -e "${YELLOW}${I18N_WARN_UNIBOOT_IPXE_MISSING}${NC}"
 fi
 

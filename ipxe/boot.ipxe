@@ -24,11 +24,9 @@ console --picture file:/ventoy/themes/uniboot/background.png --left 120 --right 
 
 # Try a local customization first. If it is unavailable, use the network center.
 chain file:/ipxe/uniboot.ipxe 2>/dev/null || chain file:uniboot.ipxe 2>/dev/null ||
-
 #!ipxe
 # UniBoot Custom iPXE Menu
 # Copyright (c) 2026-present SnowdreamTech Inc.
 
 # Enter the network center.
 chain https://boot.netboot.xyz/menu.ipxe
-
