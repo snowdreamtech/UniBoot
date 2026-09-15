@@ -94,13 +94,12 @@ fi
 if [ "$INSIDE_CONTAINER" -eq 1 ] || [ "$(id -u)" -eq 0 ]; then
     apt-get update -qq
     apt-get install -y --no-install-recommends \
-        gcc gcc-i686-linux-gnu gcc-aarch64-linux-gnu gcc-arm-linux-gnueabi \
-        gcc-riscv64-linux-gnu gcc-loongarch64-linux-gnu \
-        make perl liblzma-dev mtools git ca-certificates libssl-dev || \
-    apt-get install -y --no-install-recommends \
-        gcc gcc-i686-linux-gnu gcc-aarch64-linux-gnu gcc-arm-linux-gnueabi \
-        gcc-riscv64-linux-gnu gcc-13-loongarch64-linux-gnu \
-        make perl liblzma-dev mtools git ca-certificates libssl-dev || true
+        build-essential libc6-dev gcc-multilib libc6-dev-i386 \
+        gcc-i686-linux-gnu gcc-aarch64-linux-gnu gcc-arm-linux-gnueabi \
+        gcc-riscv64-linux-gnu \
+        make perl liblzma-dev mtools git ca-certificates libssl-dev
+    apt-get install -y --no-install-recommends gcc-loongarch64-linux-gnu || \
+        apt-get install -y --no-install-recommends gcc-13-loongarch64-linux-gnu
 
     if command -v loongarch64-linux-gnu-gcc-13 &>/dev/null; then
         ln -sf /usr/bin/loongarch64-linux-gnu-gcc-13 /usr/bin/loongarch64-linux-gnu-gcc
@@ -108,9 +107,12 @@ if [ "$INSIDE_CONTAINER" -eq 1 ] || [ "$(id -u)" -eq 0 ]; then
 elif [ -n "$SUDO" ] && command -v apt-get &>/dev/null; then
     $SUDO apt-get update -qq
     $SUDO apt-get install -y --no-install-recommends \
-        gcc gcc-i686-linux-gnu gcc-aarch64-linux-gnu gcc-arm-linux-gnueabi \
-        gcc-riscv64-linux-gnu gcc-loongarch64-linux-gnu \
-        make perl liblzma-dev mtools git ca-certificates libssl-dev || true
+        build-essential libc6-dev gcc-multilib libc6-dev-i386 \
+        gcc-i686-linux-gnu gcc-aarch64-linux-gnu gcc-arm-linux-gnueabi \
+        gcc-riscv64-linux-gnu \
+        make perl liblzma-dev mtools git ca-certificates libssl-dev
+    $SUDO apt-get install -y --no-install-recommends gcc-loongarch64-linux-gnu || \
+        $SUDO apt-get install -y --no-install-recommends gcc-13-loongarch64-linux-gnu
 fi
 
 # 2. Checkout official iPXE repository at locked SHA
@@ -334,11 +336,9 @@ echo -e "${BLUE}Compiling RISC-V 32 EFI...${NC}"
 make -j"${NPROC}" NO_WERROR=1 CROSS_COMPILE=riscv64-linux-gnu- bin-riscv32-efi/ipxe.efi EMBED="${EMBED_FILE}" || true
 [ -f bin-riscv32-efi/ipxe.efi ] && cp bin-riscv32-efi/ipxe.efi "${OUTPUT_DIR}/ipxe-riscv32.efi" || true
 
-if command -v loongarch64-linux-gnu-gcc &>/dev/null; then
-    echo -e "${BLUE}Compiling LoongArch64 EFI...${NC}"
-    make -j"${NPROC}" NO_WERROR=1 CROSS_COMPILE=loongarch64-linux-gnu- bin-loong64-efi/ipxe.efi EMBED="${EMBED_FILE}"
-    cp bin-loong64-efi/ipxe.efi "${OUTPUT_DIR}/ipxe-loongarch64.efi"
-fi
+echo -e "${BLUE}Compiling LoongArch64 EFI...${NC}"
+make -j"${NPROC}" NO_WERROR=1 CROSS_COMPILE=loongarch64-linux-gnu- bin-loong64-efi/ipxe.efi EMBED="${EMBED_FILE}"
+cp bin-loong64-efi/ipxe.efi "${OUTPUT_DIR}/ipxe-loongarch64.efi"
 
 # 5. Fix file permissions inside container if running as root
 if [ "$INSIDE_CONTAINER" -eq 1 ]; then
@@ -349,7 +349,7 @@ if [ "$INSIDE_CONTAINER" -eq 1 ]; then
 fi
 
 # 6. Verify critical binary artifacts
-CRITICAL_ARTIFACTS=("ipxe.lkrn" "undionly.kpxe" "ipxe-x86_64.efi" "ipxe-arm64.efi")
+CRITICAL_ARTIFACTS=("ipxe.lkrn" "undionly.kpxe" "ipxe-x86_64.efi" "ipxe-arm64.efi" "ipxe-loongarch64.efi")
 for artifact in "${CRITICAL_ARTIFACTS[@]}"; do
     if [ ! -s "${OUTPUT_DIR}/${artifact}" ]; then
         echo -e "${RED}Error: Critical compilation output missing or empty: ${OUTPUT_DIR}/${artifact}${NC}"

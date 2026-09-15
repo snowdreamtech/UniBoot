@@ -37,13 +37,20 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y \
+            build-essential libc6-dev gcc-multilib libc6-dev-i386 \
             gcc-i686-linux-gnu \
             gcc-aarch64-linux-gnu \
             gcc-arm-linux-gnueabi \
             gcc-riscv64-linux-gnu \
-            gcc-13-loongarch64-linux-gnu \
-            make perl liblzma-dev mtools
-          sudo ln -sf /usr/bin/loongarch64-linux-gnu-gcc-13 /usr/bin/loongarch64-linux-gnu-gcc
+            make perl liblzma-dev mtools git ca-certificates libssl-dev
+          sudo apt-get install -y \
+              gcc-13-loongarch64-linux-gnu || sudo apt-get install -y gcc-loongarch64-linux-gnu
+          if command -v loongarch64-linux-gnu-gcc-13 >/dev/null 2>&1; then
+            sudo ln -sf "$(command -v loongarch64-linux-gnu-gcc-13)" /usr/bin/loongarch64-linux-gnu-gcc
+          elif ! command -v loongarch64-linux-gnu-gcc >/dev/null 2>&1; then
+            echo "LoongArch64 cross-compiler installation failed."
+            exit 1
+          fi
           # NOTE: gcc-i686-linux-gnu replaces gcc-multilib - no conflicts with other cross-compilers.
 
       - name: "🌐 Checkout Official iPXE Repository"
