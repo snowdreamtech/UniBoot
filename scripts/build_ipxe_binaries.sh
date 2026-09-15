@@ -94,7 +94,7 @@ fi
 if [ "$INSIDE_CONTAINER" -eq 1 ] || [ "$(id -u)" -eq 0 ]; then
     apt-get update -qq
     apt-get install -y --no-install-recommends \
-        build-essential libc6-dev gcc-multilib libc6-dev-i386 \
+        build-essential libc6-dev \
         gcc-i686-linux-gnu gcc-aarch64-linux-gnu gcc-arm-linux-gnueabi \
         gcc-riscv64-linux-gnu \
         make perl liblzma-dev mtools git ca-certificates libssl-dev
@@ -107,7 +107,7 @@ if [ "$INSIDE_CONTAINER" -eq 1 ] || [ "$(id -u)" -eq 0 ]; then
 elif [ -n "$SUDO" ] && command -v apt-get &>/dev/null; then
     $SUDO apt-get update -qq
     $SUDO apt-get install -y --no-install-recommends \
-        build-essential libc6-dev gcc-multilib libc6-dev-i386 \
+        build-essential libc6-dev \
         gcc-i686-linux-gnu gcc-aarch64-linux-gnu gcc-arm-linux-gnueabi \
         gcc-riscv64-linux-gnu \
         make perl liblzma-dev mtools git ca-certificates libssl-dev
