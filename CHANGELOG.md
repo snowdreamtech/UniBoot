@@ -1,5 +1,31 @@
 # Changelog
 
+## [1.2.0](https://github.com/snowdreamtech/UniBoot/compare/v1.1.0...v1.2.0) (2026-09-16)
+
+
+### 🚀 Features
+
+* **release:** include background.png as release asset for 1:1 Ventoy theme ([7016ff3](https://github.com/snowdreamtech/UniBoot/commit/7016ff3edbd31ee7b36f6d022ab2d984f0aca2b8))
+
+
+### 🐛 Bug Fixes
+
+* centralize embedded iPXE generation ([5e76ae5](https://github.com/snowdreamtech/UniBoot/commit/5e76ae5e6934e662a3a7478ce6a18e9ff8284157))
+* harden container build dependencies ([c0bf854](https://github.com/snowdreamtech/UniBoot/commit/c0bf8540365864b053cbad885c9437d0d881910f))
+* initialize network before iPXE chaining ([8752291](https://github.com/snowdreamtech/UniBoot/commit/87522910ae935bb8525c3d6df52832b66e124356))
+* resolve Debian i386 toolchain conflict ([235dcd8](https://github.com/snowdreamtech/UniBoot/commit/235dcd8fe5d5521afea747761896412131485eef))
+
+
+### 🛠 Refactoring
+
+* simplify embedded iPXE entry ([1cdb144](https://github.com/snowdreamtech/UniBoot/commit/1cdb1441407d51c14f4768c3db56b120ba1e8a69))
+
+
+### ♻️ Miscellaneous Chores
+
+* **ipxe:** auto-compile lkrn, kpxe and multi-arch EFI binaries with embedded script ([ed2faab](https://github.com/snowdreamtech/UniBoot/commit/ed2faab734241ac3bbe23add178392e924c18524))
+* **ipxe:** auto-compile lkrn, kpxe and multi-arch EFI binaries with embedded script ([2e988d6](https://github.com/snowdreamtech/UniBoot/commit/2e988d6affacf8624210633170f3085b58ddbc55))
+
 ## [1.1.0](https://github.com/snowdreamtech/UniBoot/compare/v1.0.0...v1.1.0) (2026-09-13)
 
 
