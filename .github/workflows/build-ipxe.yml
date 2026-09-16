@@ -18,21 +18,25 @@ name: "🔨 Build iPXE Binaries (EFI + LKRN)"
       - "scripts/**"
       - ".github/workflows/build-ipxe.yml"
 
-permissions:
-  contents: write
-  id-token: write
-  statuses: write
+permissions: {}
 
 jobs:
   build:
     name: "🔨 Multi-Arch iPXE Compilation"
     runs-on: ubuntu-latest
+    timeout-minutes: 45
+    concurrency:
+      group: uniboot-ipxe-${{ github.ref }}
+      cancel-in-progress: false
+    permissions:
+      contents: write
 
     steps:
       - name: "📂 Checkout Repository Code"
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          persist-credentials: false
 
       - name: "🛠️ Install Cross-Compilers and Dependencies"
         run: |
@@ -56,11 +60,16 @@ jobs:
 
       - name: "🌐 Checkout Official iPXE Repository"
         run: |
-          # Lock iPXE to verified stable commit SHA (v2.0.0+ / ff6e520)
+          set -euo pipefail
+          # Lock iPXE to a reviewed stable commit SHA.
           IPXE_COMMIT="ff6e52063e0b37062394fe37b9788af25175e7af"
-          git clone https://github.com/ipxe/ipxe.git /tmp/ipxe
+          git init /tmp/ipxe
           cd /tmp/ipxe
-          git checkout "${IPXE_COMMIT}"
+          git remote add origin https://github.com/ipxe/ipxe.git
+          git -c protocol.version=2 fetch --depth 1 origin "${IPXE_COMMIT}"
+          test "$(git rev-parse FETCH_HEAD)" = "${IPXE_COMMIT}"
+          git checkout --detach "${IPXE_COMMIT}"
+          test "$(git remote get-url origin)" = "https://github.com/ipxe/ipxe.git"
 
       - name: "⚙️ Enable Protocols, Commands and Features in iPXE Config"
         run: |
@@ -215,53 +224,57 @@ jobs:
 
           # ── BIOS & LKRN: x86 & RISC-V lkrn (Linux bzImage with embedded script) ──────────
           echo "Building x86 BIOS lkrn..."
-          make -j$(nproc) NO_WERROR=1 CROSS_COMPILE=i686-linux-gnu- bin/ipxe.lkrn EMBED="${EMBED_FILE}"
+          make -j"$(nproc)" NO_WERROR=1 CROSS_COMPILE=i686-linux-gnu- bin/ipxe.lkrn EMBED="${EMBED_FILE}"
           cp bin/ipxe.lkrn "${GITHUB_WORKSPACE}/ipxe/ipxe.lkrn"
 
           echo "Building x86 BIOS undionly.kpxe..."
-          make -j$(nproc) NO_WERROR=1 CROSS_COMPILE=i686-linux-gnu- bin/undionly.kpxe EMBED="${EMBED_FILE}"
+          make -j"$(nproc)" NO_WERROR=1 CROSS_COMPILE=i686-linux-gnu- bin/undionly.kpxe EMBED="${EMBED_FILE}"
           cp bin/undionly.kpxe "${GITHUB_WORKSPACE}/ipxe/undionly.kpxe"
 
           echo "Building RISC-V 64 lkrn..."
-          make -j$(nproc) NO_WERROR=1 CROSS_COMPILE=riscv64-linux-gnu- bin-riscv64/ipxe.lkrn EMBED="${EMBED_FILE}"
+          make -j"$(nproc)" NO_WERROR=1 CROSS_COMPILE=riscv64-linux-gnu- bin-riscv64/ipxe.lkrn EMBED="${EMBED_FILE}"
           cp bin-riscv64/ipxe.lkrn "${GITHUB_WORKSPACE}/ipxe/ipxe-riscv64.lkrn"
 
           echo "Building RISC-V 32 lkrn..."
-          make -j$(nproc) NO_WERROR=1 CROSS_COMPILE=riscv64-linux-gnu- bin-riscv32/ipxe.lkrn EMBED="${EMBED_FILE}" || true
+          make -j"$(nproc)" NO_WERROR=1 CROSS_COMPILE=riscv64-linux-gnu- bin-riscv32/ipxe.lkrn EMBED="${EMBED_FILE}" || true
           [ -f bin-riscv32/ipxe.lkrn ] && cp bin-riscv32/ipxe.lkrn "${GITHUB_WORKSPACE}/ipxe/ipxe-riscv32.lkrn" || true
 
           # ── EFI: multi-arch ──────────────────────────────────────────────────
           echo "Building x86_64 EFI..."
-          make -j$(nproc) NO_WERROR=1 bin-x86_64-efi/ipxe.efi EMBED="${EMBED_FILE}"
+          make -j"$(nproc)" NO_WERROR=1 bin-x86_64-efi/ipxe.efi EMBED="${EMBED_FILE}"
           cp bin-x86_64-efi/ipxe.efi "${GITHUB_WORKSPACE}/ipxe/ipxe-x86_64.efi"
 
           echo "Building i386 EFI..."
-          make -j$(nproc) NO_WERROR=1 CROSS_COMPILE=i686-linux-gnu- bin-i386-efi/ipxe.efi EMBED="${EMBED_FILE}"
+          make -j"$(nproc)" NO_WERROR=1 CROSS_COMPILE=i686-linux-gnu- bin-i386-efi/ipxe.efi EMBED="${EMBED_FILE}"
           cp bin-i386-efi/ipxe.efi "${GITHUB_WORKSPACE}/ipxe/ipxe-i386.efi"
 
           echo "Building ARM64 EFI..."
-          make -j$(nproc) NO_WERROR=1 CROSS_COMPILE=aarch64-linux-gnu- bin-arm64-efi/ipxe.efi EMBED="${EMBED_FILE}"
+          make -j"$(nproc)" NO_WERROR=1 CROSS_COMPILE=aarch64-linux-gnu- bin-arm64-efi/ipxe.efi EMBED="${EMBED_FILE}"
           cp bin-arm64-efi/ipxe.efi "${GITHUB_WORKSPACE}/ipxe/ipxe-arm64.efi"
 
           echo "Building ARM32 EFI..."
-          make -j$(nproc) NO_WERROR=1 CROSS_COMPILE=arm-linux-gnueabi- bin-arm32-efi/ipxe.efi EMBED="${EMBED_FILE}"
+          make -j"$(nproc)" NO_WERROR=1 CROSS_COMPILE=arm-linux-gnueabi- bin-arm32-efi/ipxe.efi EMBED="${EMBED_FILE}"
           cp bin-arm32-efi/ipxe.efi "${GITHUB_WORKSPACE}/ipxe/ipxe-arm.efi"
 
           echo "Building RISC-V 64 EFI..."
-          make -j$(nproc) NO_WERROR=1 CROSS_COMPILE=riscv64-linux-gnu- bin-riscv64-efi/ipxe.efi EMBED="${EMBED_FILE}"
+          make -j"$(nproc)" NO_WERROR=1 CROSS_COMPILE=riscv64-linux-gnu- bin-riscv64-efi/ipxe.efi EMBED="${EMBED_FILE}"
           cp bin-riscv64-efi/ipxe.efi "${GITHUB_WORKSPACE}/ipxe/ipxe-riscv64.efi"
 
           echo "Building RISC-V 32 EFI..."
-          make -j$(nproc) NO_WERROR=1 CROSS_COMPILE=riscv64-linux-gnu- bin-riscv32-efi/ipxe.efi EMBED="${EMBED_FILE}" || true
+          make -j"$(nproc)" NO_WERROR=1 CROSS_COMPILE=riscv64-linux-gnu- bin-riscv32-efi/ipxe.efi EMBED="${EMBED_FILE}" || true
           [ -f bin-riscv32-efi/ipxe.efi ] && cp bin-riscv32-efi/ipxe.efi "${GITHUB_WORKSPACE}/ipxe/ipxe-riscv32.efi" || true
 
           # ── LoongArch64 EFI ──────────────────────────────────────────────────
           echo "Building LoongArch64 EFI..."
-          make -j$(nproc) NO_WERROR=1 CROSS_COMPILE=loongarch64-linux-gnu- bin-loong64-efi/ipxe.efi EMBED="${EMBED_FILE}"
+          make -j"$(nproc)" NO_WERROR=1 CROSS_COMPILE=loongarch64-linux-gnu- bin-loong64-efi/ipxe.efi EMBED="${EMBED_FILE}"
           cp bin-loong64-efi/ipxe.efi "${GITHUB_WORKSPACE}/ipxe/ipxe-loongarch64.efi"
 
       - name: "🚀 Commit and Push Compiled iPXE Binaries"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          set -euo pipefail
+          git remote set-url origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add ipxe/boot.ipxe ipxe/*.lkrn ipxe/*.efi ipxe/*.kpxe

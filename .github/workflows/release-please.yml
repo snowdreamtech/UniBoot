@@ -13,14 +13,22 @@ name: "🤖 Release Please"
       - main
   workflow_dispatch:
 
-permissions:
-  contents: write
-  pull-requests: write
+permissions: {}
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "1"
 
 jobs:
   release-please:
     name: "🤖 Release Please Automation"
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    concurrency:
+      group: uniboot-release-please-${{ github.ref }}
+      cancel-in-progress: false
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
       - name: "📝 Orchestrate Release Lifecycle (Release Please)"
         id: release

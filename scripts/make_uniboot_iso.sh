@@ -151,6 +151,7 @@ download_isolinux() {
 
     # Use Aliyun mirror for lightning-fast download in China
     local ALPINE_SYSLINUX_URL="https://mirrors.aliyun.com/alpine/v3.18/main/x86_64/syslinux-6.04_pre1-r13.apk"
+    local ALPINE_SYSLINUX_SHA256="a79b90816b016e04b532d246d70c5d0c2856cb856d425f2bb7e1a94f3210adef"
 
     local MAX_RETRIES=3
     local RETRY=0
@@ -165,6 +166,22 @@ download_isolinux() {
 
     if [ ! -f "${TMP_DIR}/syslinux.apk" ]; then
         echo -e "${RED}Error: Failed to download syslinux after ${MAX_RETRIES} retries.${NC}"
+        rm -rf "${TMP_DIR}"
+        exit 1
+    fi
+
+    local actual_sha256
+    if command -v sha256sum &>/dev/null; then
+        actual_sha256=$(sha256sum "${TMP_DIR}/syslinux.apk" | awk '{print $1}')
+    elif command -v shasum &>/dev/null; then
+        actual_sha256=$(shasum -a 256 "${TMP_DIR}/syslinux.apk" | awk '{print $1}')
+    else
+        echo -e "${RED}Error: sha256sum or shasum is required to verify syslinux.${NC}"
+        rm -rf "${TMP_DIR}"
+        exit 1
+    fi
+    if [ "${actual_sha256}" != "${ALPINE_SYSLINUX_SHA256}" ]; then
+        echo -e "${RED}Error: Syslinux checksum mismatch.${NC}"
         rm -rf "${TMP_DIR}"
         exit 1
     fi
