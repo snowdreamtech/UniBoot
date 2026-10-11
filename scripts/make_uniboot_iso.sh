@@ -229,11 +229,36 @@ fi
 STAGING_DIR=$(mktemp -d)
 IPXE_DIR="${PROJECT_ROOT}/ipxe"
 
+# Auto-detect missing firmware binaries and trigger build via Docker/Podman
+ensure_ipxe_binaries() {
+    local missing=0
+    local critical_files=("ipxe-x86_64.efi" "ipxe.lkrn" "undionly.kpxe")
+    for f in "${critical_files[@]}"; do
+        if [ ! -f "${IPXE_DIR}/${f}" ]; then
+            missing=1
+            break
+        fi
+    done
+
+    if [ "$missing" -eq 1 ]; then
+        echo -e "${YELLOW}${I18N_WARN_IPXE_BIN_MISSING:-Notice: Required iPXE firmware binaries missing. Invoking build_ipxe_binaries.sh...}${NC}"
+        if [ -f "${SCRIPT_DIR}/build_ipxe_binaries.sh" ]; then
+            bash "${SCRIPT_DIR}/build_ipxe_binaries.sh"
+        else
+            echo -e "${RED}Error: ${SCRIPT_DIR}/build_ipxe_binaries.sh not found.${NC}"
+            exit 1
+        fi
+    fi
+}
+
+ensure_ipxe_binaries
+
 # Generate the embedded entry script from the single shared generator.
 if ! bash "${SCRIPT_DIR}/generate_boot_ipxe.sh"; then
     echo -e "${RED}Failed to generate ipxe/boot.ipxe.${NC}"
     exit 1
 fi
+
 if [ ! -f "${IPXE_DIR}/uniboot.ipxe" ]; then
     echo -e "${YELLOW}${I18N_WARN_UNIBOOT_IPXE_MISSING}${NC}"
 fi

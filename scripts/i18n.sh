@@ -41,6 +41,7 @@ if [ $IS_ZH -eq 1 ]; then
     export I18N_ST_LAUNCH_UEFI="[2/2] 正在启动 QEMU UEFI 测试..."
     export I18N_ST_LAUNCH_BIOS="[2/2] 正在启动 QEMU Legacy BIOS 测试..."
     export I18N_WARN_UNIBOOT_IPXE_MISSING="警告: 未找到 ipxe/uniboot.ipxe 文件，ISO 将配置为云端回退模式。"
+    export I18N_WARN_IPXE_BIN_MISSING="检测到缺少预编译的 iPXE 固件二进制文件，正在调用 Docker/Podman 进行本地多架构编译..."
     
     # test-uefi.sh & test-bios.sh strings
     export I18N_TU_TITLE="=== UniBoot UEFI QEMU 测试器 ==="
@@ -90,6 +91,7 @@ else
     export I18N_ST_LAUNCH_UEFI="[2/2] Launching QEMU UEFI test runner..."
     export I18N_ST_LAUNCH_BIOS="[2/2] Launching QEMU Legacy BIOS test runner..."
     export I18N_WARN_UNIBOOT_IPXE_MISSING="Warning: ipxe/uniboot.ipxe not found. ISO will be configured for cloud fallback mode."
+    export I18N_WARN_IPXE_BIN_MISSING="Required iPXE firmware binaries are missing. Automatically building via Docker/Podman..."
     
     # test-uefi.sh & test-bios.sh strings
     export I18N_TU_TITLE="=== UniBoot Universal UEFI QEMU Tester ==="
