@@ -96,11 +96,22 @@ ipxe/profiles/
 ipxe/scripts/
 ipxe/sources/
 
-# Bootloader binaries (not stored in repo)
+# Bootloader and firmware binaries (not stored in git repository)
+*.efi
+*.lkrn
+*.kpxe
+*.rom
+*.usb
 boot/EFI/
 boot/grub/
 boot/ipxe/
 boot/ventoy/
+
+# Explicitly track essential scripts and themes in ipxe/ and ventoy/
+!ipxe/*.ipxe
+!ipxe/background.png
+!ventoy/themes/**
+
 
 # Temporary runtime data
 runtime/
