@@ -41,7 +41,10 @@ if [ $IS_ZH -eq 1 ]; then
     export I18N_ST_LAUNCH_UEFI="[2/2] 正在启动 QEMU UEFI 测试..."
     export I18N_ST_LAUNCH_BIOS="[2/2] 正在启动 QEMU Legacy BIOS 测试..."
     export I18N_WARN_UNIBOOT_IPXE_MISSING="警告: 未找到 ipxe/uniboot.ipxe 文件，ISO 将配置为云端回退模式。"
-    export I18N_WARN_IPXE_BIN_MISSING="检测到缺少预编译的 iPXE 固件二进制文件，正在调用 Docker/Podman 进行本地多架构编译..."
+    export I18N_WARN_IPXE_BIN_MISSING="检测到缺少预编译的 iPXE 固件二进制文件。"
+    export I18N_LOCAL_BUILD_PRIORITY="优先尝试本地全力编译 iPXE 固件 (Native/Container)..."
+    export I18N_FALLBACK_DOWNLOAD="未检测到可用本地编译环境 (缺少 Docker/Podman 或交叉编译器)，正在 Fallback 下载最新发布固件资产..."
+    export I18N_DOWNLOAD_FAILED_ERR="错误: 无法获取所需 iPXE 固件二进制！原因: 本地缺少容器编译环境，且网络下载 Release 固件失败。"
     
     # test-uefi.sh & test-bios.sh strings
     export I18N_TU_TITLE="=== UniBoot UEFI QEMU 测试器 ==="
@@ -91,7 +94,10 @@ else
     export I18N_ST_LAUNCH_UEFI="[2/2] Launching QEMU UEFI test runner..."
     export I18N_ST_LAUNCH_BIOS="[2/2] Launching QEMU Legacy BIOS test runner..."
     export I18N_WARN_UNIBOOT_IPXE_MISSING="Warning: ipxe/uniboot.ipxe not found. ISO will be configured for cloud fallback mode."
-    export I18N_WARN_IPXE_BIN_MISSING="Required iPXE firmware binaries are missing. Automatically building via Docker/Podman..."
+    export I18N_WARN_IPXE_BIN_MISSING="Notice: Required iPXE firmware binaries are missing."
+    export I18N_LOCAL_BUILD_PRIORITY="Prioritizing local compilation of iPXE firmware (Native/Container)..."
+    export I18N_FALLBACK_DOWNLOAD="No local build environment found (missing Docker/Podman or cross-compilers). Falling back to downloading release firmware assets..."
+    export I18N_DOWNLOAD_FAILED_ERR="Error: Failed to obtain required iPXE firmware binaries! Reason: Local build environment unavailable, and network download of release firmware failed."
     
     # test-uefi.sh & test-bios.sh strings
     export I18N_TU_TITLE="=== UniBoot Universal UEFI QEMU Tester ==="

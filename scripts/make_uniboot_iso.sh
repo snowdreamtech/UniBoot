@@ -229,26 +229,111 @@ fi
 STAGING_DIR=$(mktemp -d)
 IPXE_DIR="${PROJECT_ROOT}/ipxe"
 
-# Auto-detect missing firmware binaries and trigger build via Docker/Podman
+can_build_locally() {
+    # 1. Native Linux environment with cross compilers
+    if [[ "$OSTYPE" == "linux-gnu"* ]] || [[ "$OSTYPE" == "linux"* ]]; then
+        if command -v aarch64-linux-gnu-gcc &>/dev/null; then
+            return 0
+        fi
+        if [ "$(id -u)" -eq 0 ] && command -v apt-get &>/dev/null; then
+            return 0
+        fi
+        if command -v sudo &>/dev/null && command -v apt-get &>/dev/null; then
+            return 0
+        fi
+    fi
+
+    # 2. Container environment: Docker daemon running
+    if command -v docker &>/dev/null && docker info &>/dev/null; then
+        return 0
+    fi
+
+    # 3. Container environment: Podman daemon running
+    if command -v podman &>/dev/null && podman info &>/dev/null; then
+        return 0
+    fi
+
+    return 1
+}
+
+# Auto-detect missing firmware binaries: prioritize local compilation, fallback to downloading release assets
 ensure_ipxe_binaries() {
-    local missing=0
-    local critical_files=("ipxe-x86_64.efi" "ipxe.lkrn" "undionly.kpxe")
+    local missing_files=()
+    local critical_files=(
+        "ipxe-x86_64.efi"
+        "ipxe-arm64.efi"
+        "ipxe-i386.efi"
+        "ipxe-arm.efi"
+        "ipxe-riscv64.efi"
+        "ipxe-riscv32.efi"
+        "ipxe-loongarch64.efi"
+        "ipxe.lkrn"
+        "ipxe-riscv64.lkrn"
+        "ipxe-riscv32.lkrn"
+        "undionly.kpxe"
+    )
+
     for f in "${critical_files[@]}"; do
-        if [ ! -f "${IPXE_DIR}/${f}" ]; then
-            missing=1
+        if [ ! -s "${IPXE_DIR}/${f}" ]; then
+            missing_files+=("$f")
+        fi
+    done
+
+    if [ "${#missing_files[@]}" -eq 0 ]; then
+        return 0
+    fi
+
+    echo -e "${YELLOW}${I18N_WARN_IPXE_BIN_MISSING:-Notice: Required iPXE firmware binaries are missing (${#missing_files[@]} files).}${NC}"
+
+    # 1. Priority 1: Local Full Compilation (Native or Container)
+    if can_build_locally; then
+        echo -e "${BLUE}${I18N_LOCAL_BUILD_PRIORITY:-Prioritizing local compilation of iPXE firmware...}${NC}"
+        if bash "${SCRIPT_DIR}/build_ipxe_binaries.sh"; then
+            echo -e "${GREEN}本地编译完成！${NC}"
+            return 0
+        else
+            echo -e "${YELLOW}本地编译过程失败，自动切换至备份方案 (Fallback 下载)...${NC}"
+        fi
+    else
+        echo -e "${YELLOW}${I18N_FALLBACK_DOWNLOAD:-No local container/compiler detected. Falling back to downloading release assets...}${NC}"
+    fi
+
+    # 2. Priority 2: Fallback download release firmware assets
+    local BASE_URL="https://github.com/snowdreamtech/UniBoot/releases/latest/download"
+    local DOWNLOAD_ERR=0
+
+    for f in "${missing_files[@]}"; do
+        echo -e "${BLUE}  -> 正在下载固件: ${f}...${NC}"
+        local TMP_FILE="${IPXE_DIR}/${f}.tmp"
+        if curl -sSL --fail --retry 3 --connect-timeout 10 -o "${TMP_FILE}" "${BASE_URL}/${f}"; then
+            if [ -s "${TMP_FILE}" ]; then
+                mv -f "${TMP_FILE}" "${IPXE_DIR}/${f}"
+            else
+                rm -f "${TMP_FILE}"
+                DOWNLOAD_ERR=1
+                break
+            fi
+        else
+            rm -f "${TMP_FILE}"
+            DOWNLOAD_ERR=1
             break
         fi
     done
 
-    if [ "$missing" -eq 1 ]; then
-        echo -e "${YELLOW}${I18N_WARN_IPXE_BIN_MISSING:-Notice: Required iPXE firmware binaries missing. Invoking build_ipxe_binaries.sh...}${NC}"
-        if [ -f "${SCRIPT_DIR}/build_ipxe_binaries.sh" ]; then
-            bash "${SCRIPT_DIR}/build_ipxe_binaries.sh"
-        else
-            echo -e "${RED}Error: ${SCRIPT_DIR}/build_ipxe_binaries.sh not found.${NC}"
-            exit 1
-        fi
+    if [ "$DOWNLOAD_ERR" -ne 0 ]; then
+        echo -e ""
+        echo -e "${RED}========================================================================${NC}"
+        echo -e "${RED}${I18N_DOWNLOAD_FAILED_ERR:-Error: Failed to obtain iPXE firmware binaries!}${NC}"
+        echo -e "${RED}网络请求失败，且本地缺乏 Docker / Podman 编译环境，已终止执行。${NC}"
+        echo -e "${YELLOW}解决建议:${NC}"
+        echo -e "${YELLOW}  1. 启动 Docker Desktop 或安装 Podman，以便本地离线全力编译；${NC}"
+        echo -e "${YELLOW}  2. 检查网络连接是否通畅，确保可访问 GitHub Releases；${NC}"
+        echo -e "${YELLOW}  3. 或手动将 ${f} 放入 ${IPXE_DIR}/ 目录。${NC}"
+        echo -e "${RED}========================================================================${NC}"
+        exit 1
     fi
+
+    echo -e "${GREEN}固件下载并验证成功！${NC}"
 }
 
 ensure_ipxe_binaries
