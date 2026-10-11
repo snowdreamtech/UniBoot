@@ -52,6 +52,29 @@ jobs:
       - name: "📦 Install Syft"
         uses: anchore/sbom-action/download-syft@e22c389904149dbc22b58101806040fa8d37a610 # v0.24.0
 
+      - name: "🛠️ Install Cross-Compilers and ISO Tools"
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential libc6-dev \
+            gcc-i686-linux-gnu \
+            gcc-aarch64-linux-gnu \
+            gcc-arm-linux-gnueabi \
+            gcc-riscv64-linux-gnu \
+            make perl liblzma-dev mtools git ca-certificates libssl-dev genisoimage
+          sudo apt-get install -y \
+              gcc-13-loongarch64-linux-gnu || sudo apt-get install -y gcc-loongarch64-linux-gnu
+          if command -v loongarch64-linux-gnu-gcc-13 >/dev/null 2>&1; then
+            sudo ln -sf "$(command -v loongarch64-linux-gnu-gcc-13)" /usr/bin/loongarch64-linux-gnu-gcc
+          elif ! command -v loongarch64-linux-gnu-gcc >/dev/null 2>&1; then
+            echo "LoongArch64 cross-compiler installation failed."
+            exit 1
+          fi
+
+      - name: "🔨 Build Multi-Arch iPXE Firmware Binaries"
+        run: |
+          bash scripts/build_ipxe_binaries.sh
+
       - name: "🚀 Run GoReleaser"
         uses: goreleaser/goreleaser-action@5daf1e915a5f0af01ddbcd89a43b8061ff4f1a89 # v7.2.2
         with:

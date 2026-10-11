@@ -4,19 +4,12 @@
 ---
 # iPXE Multi-Arch Compilation (EFI + LKRN)
 # Purpose: Cross-compiles omni-architecture EFI binaries and LKRN kernel payloads with embedded UniBoot scripts.
-# Trigger: Automated on pushes to dev branch modifying ipxe/** or workflow; manually via workflow_dispatch.
+# Trigger: Manually via workflow_dispatch for testing or artifact generation (never auto-commits to repo).
 
 name: "🔨 Build iPXE Binaries (EFI + LKRN)"
 
 "on":
   workflow_dispatch:
-  push:
-    branches:
-      - dev
-    paths:
-      - "ipxe/**"
-      - "scripts/**"
-      - ".github/workflows/build-ipxe.yml"
 
 permissions: {}
 
@@ -29,7 +22,7 @@ jobs:
       group: uniboot-ipxe-${{ github.ref }}
       cancel-in-progress: false
     permissions:
-      contents: write
+      contents: read
 
     steps:
       - name: "📂 Checkout Repository Code"
@@ -56,231 +49,17 @@ jobs:
             echo "LoongArch64 cross-compiler installation failed."
             exit 1
           fi
-          # NOTE: gcc-i686-linux-gnu replaces gcc-multilib - no conflicts with other cross-compilers.
 
-      - name: "🌐 Checkout Official iPXE Repository"
+      - name: "🔨 Build Multi-Arch iPXE Binaries"
         run: |
-          set -euo pipefail
-          # Lock iPXE to a reviewed stable commit SHA.
-          IPXE_COMMIT="ff6e52063e0b37062394fe37b9788af25175e7af"
-          git init /tmp/ipxe
-          cd /tmp/ipxe
-          git remote add origin https://github.com/ipxe/ipxe.git
-          git -c protocol.version=2 fetch --depth 1 origin "${IPXE_COMMIT}"
-          test "$(git rev-parse FETCH_HEAD)" = "${IPXE_COMMIT}"
-          git checkout --detach "${IPXE_COMMIT}"
-          test "$(git remote get-url origin)" = "https://github.com/ipxe/ipxe.git"
+          bash scripts/build_ipxe_binaries.sh
 
-      - name: "⚙️ Enable Protocols, Commands and Features in iPXE Config"
-        run: |
-          # Remove all platform #undef overrides in iPXE core headers so BIOS/LKRN builds get HTTPS & full features
-          sed -i 's/^[[:space:]]*#undef/\/\/#undef/g' /tmp/ipxe/src/config/general.h
-          sed -i 's/^[[:space:]]*#undef/\/\/#undef/g' /tmp/ipxe/src/config/console.h
-          sed -i 's/^[[:space:]]*#undef/\/\/#undef/g' /tmp/ipxe/src/config/settings.h
-
-          mkdir -p /tmp/ipxe/src/config/local
-
-          cat > /tmp/ipxe/src/config/local/general.h << 'EOF'
-          #ifndef CONFIG_LOCAL_GENERAL_H
-          #define CONFIG_LOCAL_GENERAL_H
-
-          /* Network Protocols (ALL) */
-          #define NET_PROTO_IPV4
-          #define NET_PROTO_IPV6
-          #define NET_PROTO_FCOE
-          #define NET_PROTO_STP
-          #define NET_PROTO_LACP
-
-          /* Download Protocols (ALL) */
-          #define DOWNLOAD_PROTO_TFTP
-          #define DOWNLOAD_PROTO_HTTP
-          #define DOWNLOAD_PROTO_HTTPS
-          #define DOWNLOAD_PROTO_FTP
-          #define DOWNLOAD_PROTO_SLAM
-          #define DOWNLOAD_PROTO_NFS
-
-          /* SAN Boot Protocols (ALL) */
-          #define SANBOOT_PROTO_AOE
-          #define SANBOOT_PROTO_HTTP
-          #define SANBOOT_PROTO_ISCSI
-
-          /* Commands (ALL) */
-          #define AUTOBOOT_CMD
-          #define CERT_CMD
-          #define CONFIG_CMD
-          #define CONSOLE_CMD
-          #define DIGEST_CMD
-          #define DHCP_CMD
-          #define FORM_CMD
-          #define IFMGMT_CMD
-          #define IMAGE_CMD
-          #define IMAGE_ARCHIVE_CMD
-          #define IMAGE_CRYPT_CMD
-          #define IMAGE_MEM_CMD
-          #define IMAGE_SET_CMD
-          #define IMAGE_TRUST_CMD
-          #define IPSTAT_CMD
-          #define IWMGMT_CMD
-          #define LOGIN_CMD
-          #define LOTEST_CMD
-          #define MENU_CMD
-          #define NEIGHBOUR_CMD
-          #define NSLOOKUP_CMD
-          #define NTP_CMD
-          #define NVO_CMD
-          #define PARAM_CMD
-          #define PCI_CMD
-          #define PING_CMD
-          #define PROFSTAT_CMD
-          #define ROUTE_CMD
-          #define SANBOOT_CMD
-          #define SHELL_CMD
-          #define SHIM_CMD
-          #define SYNC_CMD
-          #define TIME_CMD
-          #define USB_CMD
-          #define VLAN_CMD
-          #define POWEROFF_CMD
-          #define REBOOT_CMD
-
-          /* General Image Formats & Compression */
-          #define IMAGE_DER
-          #define IMAGE_GZIP
-          #define IMAGE_PEM
-          #define IMAGE_PNM
-          #define IMAGE_PNG
-          #define IMAGE_SCRIPT
-          #define IMAGE_ZLIB
-          #define IMAGE_MIME
-
-          /* Platform-Specific Capabilities */
-          #if defined ( PLATFORM_efi )
-            #define IMAGE_EFI
-            #define IMAGE_EFISIG
-            #define CERTS_EFI
-            #define DOWNLOAD_PROTO_FILE
-          #endif
-
-          #if defined ( PLATFORM_pcbios )
-            #define IMAGE_BZIMAGE
-            #define IMAGE_COMBOOT
-            #define IMAGE_ELF
-            #define IMAGE_MULTIBOOT
-            #define IMAGE_NBI
-            #define IMAGE_PXE
-            #define IMAGE_SDI
-            #define PXE_CMD
-            #define PXE_MENU
-            #define PXE_STACK
-          #endif
-
-          #if defined ( PLATFORM_sbi )
-            #define IMAGE_LKRN
-          #endif
-
-          /* Crypto & Security (ALL) */
-          #define EAP_METHOD_MD5
-          #define EAP_METHOD_MSCHAPV2
-          #define CRYPTO_80211_WEP
-          #define CRYPTO_80211_WPA
-          #define CRYPTO_80211_WPA2
-
-          #endif
-          EOF
-
-          cat > /tmp/ipxe/src/config/local/crypto.h << 'EOF'
-          #ifndef CONFIG_LOCAL_CRYPTO_H
-          #define CONFIG_LOCAL_CRYPTO_H
-          #define CRYPTO_80211_WEP
-          #define CRYPTO_80211_WPA
-          #define CRYPTO_80211_WPA2
-          #endif
-          EOF
-
-          cat > /tmp/ipxe/src/config/local/console.h << 'EOF'
-          #ifndef CONFIG_LOCAL_CONSOLE_H
-          #define CONFIG_LOCAL_CONSOLE_H
-          #if defined ( PLATFORM_pcbios )
-            #define CONSOLE_PCBIOS
-          #endif
-          #if defined ( PLATFORM_efi )
-            #define CONSOLE_EFI
-          #endif
-          #if defined ( __i386__ ) || defined ( __x86_64__ )
-            #define CONSOLE_VMWARE
-          #endif
-          #define CONSOLE_SERIAL
-          #endif
-          EOF
-
-      - name: "🔨 Build Multi-Arch iPXE Binaries with Embedded Script"
-        run: |
-          bash "${GITHUB_WORKSPACE}/scripts/generate_boot_ipxe.sh"
-
-          cd /tmp/ipxe/src
-
-          # Our custom embedded script path
-          EMBED_FILE="${GITHUB_WORKSPACE}/ipxe/boot.ipxe"
-
-          # ── BIOS & LKRN: x86 & RISC-V lkrn (Linux bzImage with embedded script) ──────────
-          echo "Building x86 BIOS lkrn..."
-          make -j"$(nproc)" NO_WERROR=1 CROSS_COMPILE=i686-linux-gnu- bin/ipxe.lkrn EMBED="${EMBED_FILE}"
-          cp bin/ipxe.lkrn "${GITHUB_WORKSPACE}/ipxe/ipxe.lkrn"
-
-          echo "Building x86 BIOS undionly.kpxe..."
-          make -j"$(nproc)" NO_WERROR=1 CROSS_COMPILE=i686-linux-gnu- bin/undionly.kpxe EMBED="${EMBED_FILE}"
-          cp bin/undionly.kpxe "${GITHUB_WORKSPACE}/ipxe/undionly.kpxe"
-
-          echo "Building RISC-V 64 lkrn..."
-          make -j"$(nproc)" NO_WERROR=1 CROSS_COMPILE=riscv64-linux-gnu- bin-riscv64/ipxe.lkrn EMBED="${EMBED_FILE}"
-          cp bin-riscv64/ipxe.lkrn "${GITHUB_WORKSPACE}/ipxe/ipxe-riscv64.lkrn"
-
-          echo "Building RISC-V 32 lkrn..."
-          make -j"$(nproc)" NO_WERROR=1 CROSS_COMPILE=riscv64-linux-gnu- bin-riscv32/ipxe.lkrn EMBED="${EMBED_FILE}" || true
-          [ -f bin-riscv32/ipxe.lkrn ] && cp bin-riscv32/ipxe.lkrn "${GITHUB_WORKSPACE}/ipxe/ipxe-riscv32.lkrn" || true
-
-          # ── EFI: multi-arch ──────────────────────────────────────────────────
-          echo "Building x86_64 EFI..."
-          make -j"$(nproc)" NO_WERROR=1 bin-x86_64-efi/ipxe.efi EMBED="${EMBED_FILE}"
-          cp bin-x86_64-efi/ipxe.efi "${GITHUB_WORKSPACE}/ipxe/ipxe-x86_64.efi"
-
-          echo "Building i386 EFI..."
-          make -j"$(nproc)" NO_WERROR=1 CROSS_COMPILE=i686-linux-gnu- bin-i386-efi/ipxe.efi EMBED="${EMBED_FILE}"
-          cp bin-i386-efi/ipxe.efi "${GITHUB_WORKSPACE}/ipxe/ipxe-i386.efi"
-
-          echo "Building ARM64 EFI..."
-          make -j"$(nproc)" NO_WERROR=1 CROSS_COMPILE=aarch64-linux-gnu- bin-arm64-efi/ipxe.efi EMBED="${EMBED_FILE}"
-          cp bin-arm64-efi/ipxe.efi "${GITHUB_WORKSPACE}/ipxe/ipxe-arm64.efi"
-
-          echo "Building ARM32 EFI..."
-          make -j"$(nproc)" NO_WERROR=1 CROSS_COMPILE=arm-linux-gnueabi- bin-arm32-efi/ipxe.efi EMBED="${EMBED_FILE}"
-          cp bin-arm32-efi/ipxe.efi "${GITHUB_WORKSPACE}/ipxe/ipxe-arm.efi"
-
-          echo "Building RISC-V 64 EFI..."
-          make -j"$(nproc)" NO_WERROR=1 CROSS_COMPILE=riscv64-linux-gnu- bin-riscv64-efi/ipxe.efi EMBED="${EMBED_FILE}"
-          cp bin-riscv64-efi/ipxe.efi "${GITHUB_WORKSPACE}/ipxe/ipxe-riscv64.efi"
-
-          echo "Building RISC-V 32 EFI..."
-          make -j"$(nproc)" NO_WERROR=1 CROSS_COMPILE=riscv64-linux-gnu- bin-riscv32-efi/ipxe.efi EMBED="${EMBED_FILE}" || true
-          [ -f bin-riscv32-efi/ipxe.efi ] && cp bin-riscv32-efi/ipxe.efi "${GITHUB_WORKSPACE}/ipxe/ipxe-riscv32.efi" || true
-
-          # ── LoongArch64 EFI ──────────────────────────────────────────────────
-          echo "Building LoongArch64 EFI..."
-          make -j"$(nproc)" NO_WERROR=1 CROSS_COMPILE=loongarch64-linux-gnu- bin-loong64-efi/ipxe.efi EMBED="${EMBED_FILE}"
-          cp bin-loong64-efi/ipxe.efi "${GITHUB_WORKSPACE}/ipxe/ipxe-loongarch64.efi"
-
-      - name: "🚀 Commit and Push Compiled iPXE Binaries"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          set -euo pipefail
-          git remote set-url origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add ipxe/boot.ipxe ipxe/*.lkrn ipxe/*.efi ipxe/*.kpxe
-          if git diff --staged --quiet; then
-            echo "No changes to commit."
-          else
-            git commit -m "chore(ipxe): auto-compile lkrn, kpxe and multi-arch EFI binaries with embedded script"
-            git push
-          fi
+      - name: "📦 Upload Compiled iPXE Binaries as Artifact"
+        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
+        with:
+          name: ipxe-binaries
+          path: |
+            ipxe/*.efi
+            ipxe/*.lkrn
+            ipxe/*.kpxe
+          retention-days: 14
