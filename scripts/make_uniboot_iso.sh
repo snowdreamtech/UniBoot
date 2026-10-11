@@ -289,10 +289,10 @@ ensure_ipxe_binaries() {
     if can_build_locally; then
         echo -e "${BLUE}${I18N_LOCAL_BUILD_PRIORITY:-Prioritizing local compilation of iPXE firmware...}${NC}"
         if bash "${SCRIPT_DIR}/build_ipxe_binaries.sh"; then
-            echo -e "${GREEN}本地编译完成！${NC}"
+            echo -e "${GREEN}Local compilation completed successfully!${NC}"
             return 0
         else
-            echo -e "${YELLOW}本地编译过程失败，自动切换至备份方案 (Fallback 下载)...${NC}"
+            echo -e "${YELLOW}Local compilation failed. Switching to fallback plan (download release assets)...${NC}"
         fi
     else
         echo -e "${YELLOW}${I18N_FALLBACK_DOWNLOAD:-No local container/compiler detected. Falling back to downloading release assets...}${NC}"
@@ -303,7 +303,7 @@ ensure_ipxe_binaries() {
     local DOWNLOAD_ERR=0
 
     for f in "${missing_files[@]}"; do
-        echo -e "${BLUE}  -> 正在下载固件: ${f}...${NC}"
+        echo -e "${BLUE}  -> Downloading firmware asset: ${f}...${NC}"
         local TMP_FILE="${IPXE_DIR}/${f}.tmp"
         if curl -sSL --fail --retry 3 --connect-timeout 10 -o "${TMP_FILE}" "${BASE_URL}/${f}"; then
             if [ -s "${TMP_FILE}" ]; then
@@ -324,16 +324,16 @@ ensure_ipxe_binaries() {
         echo -e ""
         echo -e "${RED}========================================================================${NC}"
         echo -e "${RED}${I18N_DOWNLOAD_FAILED_ERR:-Error: Failed to obtain iPXE firmware binaries!}${NC}"
-        echo -e "${RED}网络请求失败，且本地缺乏 Docker / Podman 编译环境，已终止执行。${NC}"
-        echo -e "${YELLOW}解决建议:${NC}"
-        echo -e "${YELLOW}  1. 启动 Docker Desktop 或安装 Podman，以便本地离线全力编译；${NC}"
-        echo -e "${YELLOW}  2. 检查网络连接是否通畅，确保可访问 GitHub Releases；${NC}"
-        echo -e "${YELLOW}  3. 或手动将 ${f} 放入 ${IPXE_DIR}/ 目录。${NC}"
+        echo -e "${RED}Network request failed, and local Docker/Podman build environment is unavailable. Terminated.${NC}"
+        echo -e "${YELLOW}Resolution suggestions:${NC}"
+        echo -e "${YELLOW}  1. Start Docker Desktop or install Podman for full offline local compilation;${NC}"
+        echo -e "${YELLOW}  2. Verify network connectivity to GitHub Releases;${NC}"
+        echo -e "${YELLOW}  3. Or manually place ${f} into the ${IPXE_DIR}/ directory.${NC}"
         echo -e "${RED}========================================================================${NC}"
         exit 1
     fi
 
-    echo -e "${GREEN}固件下载并验证成功！${NC}"
+    echo -e "${GREEN}Firmware assets downloaded and verified successfully!${NC}"
 }
 
 ensure_ipxe_binaries

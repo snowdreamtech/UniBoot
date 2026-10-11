@@ -70,14 +70,14 @@ if [ "$INSIDE_CONTAINER" -eq 0 ]; then
             echo -e "${GREEN}=== Build Complete! Artifacts updated in ipxe/ ===${NC}"
             exit 0
         elif [ -n "$CONTAINER_CMD" ] && [ "$DAEMON_RUNNING" -eq 0 ]; then
-            echo -e "${RED}错误/Error: 已检测到 ${CONTAINER_CMD} 命令行工具，但 ${CONTAINER_CMD} 服务进程未启动。${NC}"
-            echo -e "${YELLOW}提示: 请先启动 Docker Desktop (${CONTAINER_CMD} daemon) 后重新重试。${NC}"
-            echo -e "${YELLOW}注: 若无需重新编译固件，日常测试直接运行 ./scripts/sync-and-test.sh 即可（使用已有编译固件）。${NC}"
+            echo -e "${RED}Error: ${CONTAINER_CMD} command-line tool found, but ${CONTAINER_CMD} daemon is not running.${NC}"
+            echo -e "${YELLOW}Hint: Please start Docker Desktop (${CONTAINER_CMD} daemon) and try again.${NC}"
+            echo -e "${YELLOW}Note: If firmware recompilation is not required, run ./scripts/sync-and-test.sh directly.${NC}"
             exit 1
         else
-            echo -e "${RED}错误/Error: 重新编译多架构 iPXE 固件需要安装并启动 Docker 或 Podman 容器引擎。${NC}"
-            echo -e "${YELLOW}提示: 请安装并启动 Docker Desktop (macOS/Windows) 或在 Linux 环境中运行。${NC}"
-            echo -e "${YELLOW}注: 若无需重新编译固件，日常测试直接运行 ./scripts/sync-and-test.sh 即可（使用已有编译固件）。${NC}"
+            echo -e "${RED}Error: Compiling multi-arch iPXE firmware requires Docker or Podman container engine.${NC}"
+            echo -e "${YELLOW}Hint: Please install and start Docker Desktop (macOS/Windows) or run in a Linux environment.${NC}"
+            echo -e "${YELLOW}Note: If firmware recompilation is not required, run ./scripts/sync-and-test.sh directly.${NC}"
             exit 1
         fi
     fi
