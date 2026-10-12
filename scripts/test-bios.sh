@@ -111,10 +111,23 @@ RAW_DRIVE=""
 
 # macOS Smart Disk Detection & Unmount
 if [ "$OS_TYPE" == "macOS" ]; then
-    if [ -d "/Volumes/Ventoy" ]; then
-        DISK_ID=$(diskutil info /Volumes/Ventoy | grep "Part of Whole" | awk '{print $NF}')
-    else
-        DISK_ID=$(diskutil list | grep "Ventoy" | head -n 1 | awk '{print $NF}' | cut -d's' -f1)
+    if [ -n "$VENTOY_DISK" ]; then
+        DISK_ID="$VENTOY_DISK"
+    elif [ -n "$UNIBOOT_DISK" ]; then
+        DISK_ID="$UNIBOOT_DISK"
+    fi
+
+    if [ -z "$DISK_ID" ]; then
+        for v in /Volumes/UNIBOOT /Volumes/UniBoot /Volumes/Ventoy /Volumes/uniboot /Volumes/ventoy; do
+            if [ -d "$v" ]; then
+                DISK_ID=$(diskutil info "$v" | grep "Part of Whole" | awk '{print $NF}')
+                [ -n "$DISK_ID" ] && break
+            fi
+        done
+    fi
+
+    if [ -z "$DISK_ID" ]; then
+        DISK_ID=$(diskutil list | grep -E "UNIBOOT|UniBoot|Ventoy|VTOYEFI" | head -n 1 | awk '{print $NF}' | sed -E 's/s[0-9]+$//')
     fi
 
     # Fallback to external physical disk auto-detection
@@ -141,8 +154,12 @@ if [ "$OS_TYPE" == "macOS" ]; then
 
 # Linux Smart Disk Detection & Unmount
 elif [ "$OS_TYPE" == "Linux" ]; then
-    if command -v lsblk &>/dev/null; then
-        DISK_ID=$(lsblk -o NAME,LABEL -pn | grep "Ventoy" | head -n 1 | awk '{print $1}' | sed 's/[0-9]*$//')
+    if [ -n "$VENTOY_DISK" ]; then
+        DISK_ID="$VENTOY_DISK"
+    elif [ -n "$UNIBOOT_DISK" ]; then
+        DISK_ID="$UNIBOOT_DISK"
+    elif command -v lsblk &>/dev/null; then
+        DISK_ID=$(lsblk -o NAME,LABEL -pn | grep -E "UNIBOOT|UniBoot|Ventoy|VTOYEFI" | head -n 1 | awk '{print $1}' | sed -E 's/[0-9]+$//')
     fi
     if [ -z "$DISK_ID" ]; then
         echo -e "${RED}${I18N_ERR_NO_USB}${NC}"

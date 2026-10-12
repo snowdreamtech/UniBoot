@@ -117,27 +117,70 @@ fi
 VENTOY_MOUNT=""
 
 find_ventoy_mount() {
-    # Check macOS standard mount point
-    if [ -d "/Volumes/Ventoy" ]; then
-        echo "/Volumes/Ventoy"
+    # Check user override via environment variables
+    if [ -n "$VENTOY_MOUNT_DIR" ] && [ -d "$VENTOY_MOUNT_DIR" ]; then
+        echo "$VENTOY_MOUNT_DIR"
+        return 0
+    fi
+    if [ -n "$VENTOY_MOUNT" ] && [ -d "$VENTOY_MOUNT" ]; then
+        echo "$VENTOY_MOUNT"
+        return 0
+    fi
+    if [ -n "$UNIBOOT_MOUNT" ] && [ -d "$UNIBOOT_MOUNT" ]; then
+        echo "$UNIBOOT_MOUNT"
         return 0
     fi
 
-    # Check Linux media mount points
-    for d in /media/*/*/Ventoy /media/*/Ventoy /run/media/*/*/Ventoy /run/media/*/Ventoy /mnt/Ventoy; do
-        if [ -d "$d" ]; then
-            echo "$d"
+    # Check macOS standard mount points
+    for v in /Volumes/UNIBOOT /Volumes/UniBoot /Volumes/Ventoy /Volumes/uniboot /Volumes/ventoy; do
+        if [ -d "$v" ]; then
+            echo "$v"
             return 0
         fi
+    done
+
+    # Check Linux media mount points
+    for l in UNIBOOT UniBoot Ventoy uniboot ventoy; do
+        for d in /media/*/*/"$l" /media/*/"$l" /run/media/*/*/"$l" /run/media/*/"$l" /mnt/"$l"; do
+            if [ -d "$d" ]; then
+                echo "$d"
+                return 0
+            fi
+        done
     done
 
     # Linux findmnt check
     if command -v findmnt &>/dev/null; then
         local mp
-        mp=$(findmnt -n -o TARGET -L Ventoy 2>/dev/null | head -n 1)
-        if [ -n "$mp" ] && [ -d "$mp" ]; then
-            echo "$mp"
-            return 0
+        for l in UNIBOOT UniBoot Ventoy uniboot ventoy; do
+            mp=$(findmnt -n -o TARGET -L "$l" 2>/dev/null | head -n 1)
+            if [ -n "$mp" ] && [ -d "$mp" ]; then
+                echo "$mp"
+                return 0
+            fi
+        done
+    fi
+
+    # macOS dynamic lookup via diskutil
+    if [ "$OS_TYPE" == "macOS" ] && command -v diskutil &>/dev/null; then
+        for l in UNIBOOT UniBoot Ventoy; do
+            local mp
+            mp=$(diskutil info "$l" 2>/dev/null | grep "Mount Point" | sed -E 's/^[[:space:]]*Mount Point:[[:space:]]*//')
+            if [ -n "$mp" ] && [ -d "$mp" ]; then
+                echo "$mp"
+                return 0
+            fi
+        done
+
+        local vtoy_disk
+        vtoy_disk=$(diskutil list | grep "VTOYEFI" | head -n 1 | awk '{print $NF}' | sed -E 's/s[0-9]+$//')
+        if [ -n "$vtoy_disk" ]; then
+            local mp
+            mp=$(diskutil info "${vtoy_disk}s1" 2>/dev/null | grep "Mount Point" | sed -E 's/^[[:space:]]*Mount Point:[[:space:]]*//')
+            if [ -n "$mp" ] && [ -d "$mp" ]; then
+                echo "$mp"
+                return 0
+            fi
         fi
     fi
 
@@ -148,17 +191,17 @@ find_ventoy_mount() {
 if ! VENTOY_MOUNT=$(find_ventoy_mount); then
     echo -e "${BLUE}${I18N_ST_MOUNTING}${NC}"
     if [ "$OS_TYPE" == "macOS" ]; then
-        DISK_ID=$(diskutil list | grep "Ventoy" | head -n 1 | awk '{print $NF}' | cut -d's' -f1)
+        DISK_ID=$(diskutil list | grep -E "UNIBOOT|UniBoot|Ventoy|VTOYEFI" | head -n 1 | awk '{print $NF}' | sed -E 's/s[0-9]+$//')
         if [ -z "$DISK_ID" ]; then
             DISK_ID=$(diskutil list | grep -B 1 "external, physical" | head -n 1 | awk '{print $1}' | sed 's|/dev/||')
         fi
 
         if [ -n "$DISK_ID" ]; then
-            diskutil mountDisk "/dev/$DISK_ID" || true
+            diskutil mount "${DISK_ID}s1" 2>/dev/null || diskutil mountDisk "/dev/$DISK_ID" || true
         fi
     elif [ "$OS_TYPE" == "Linux" ]; then
         if command -v udisksctl &>/dev/null && command -v lsblk &>/dev/null; then
-            PART_ID=$(lsblk -o NAME,LABEL -pn | grep "Ventoy" | head -n 1 | awk '{print $1}')
+            PART_ID=$(lsblk -o NAME,LABEL -pn | grep -E "UNIBOOT|UniBoot|Ventoy|VTOYEFI" | head -n 1 | awk '{print $1}')
             if [ -n "$PART_ID" ]; then
                 udisksctl mount -b "$PART_ID" 2>/dev/null || true
             fi
