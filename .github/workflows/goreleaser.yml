@@ -90,7 +90,7 @@ jobs:
         run: |
           set -euo pipefail
           shopt -s nullglob
-          assets=(ipxe/*.efi ipxe/*.lkrn ipxe/*.kpxe ipxe/*.ipxe ipxe/*.png iso/*.iso)
+          assets=(dist/checksums.txt ipxe/*.efi ipxe/*.lkrn ipxe/*.kpxe ipxe/*.ipxe ipxe/*.png iso/*.iso)
           test "${#assets[@]}" -gt 0
           mkdir -p dist/security
           for asset in "${assets[@]}"; do
